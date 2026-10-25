@@ -1,0 +1,549 @@
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950654.122}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950654.123}
+{"client_id": "58dfe811-b125-488f-339d-d43958d19675", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950654.123}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950654.124}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950654.124}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950654.125}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950654.125}
+{"algo_id": "DEABB8C8-A2BC-48CA-8ED0-8CDF1BD62F61", "client_id": "58dfe811-b125-488f-339d-d43958d19675", "event": "module", "scenario": "session_expire_after", "ts": 1792950654.126}
+{"client_id": "58dfe811-b125-488f-339d-d43958d19675", "event": "ticket_issued", "scenario": "session_expire_after", "ticket": "MOCK-00000001", "ts": 1792950654.127}
+{"client_id": "58dfe811-b125-488f-339d-d43958d19675", "event": "auth_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000001", "ts": 1792950654.132, "user": "fake-user"}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950659.138}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950659.139}
+{"client_id": "58dfe811-b125-488f-339d-d43958d19675", "event": "keep_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000001", "ts": 1792950659.143}
+{"age": 6.01, "event": "session_expired", "scenario": "session_expire_after", "ticket": "MOCK-00000001", "ts": 1792950660.145}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950660.145}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950660.145}
+{"client_id": "58dfe811-b125-488f-339d-d43958d19675", "error_code": "300", "event": "keep_invalid", "scenario": "session_expire_after", "ticket": "MOCK-00000001", "ts": 1792950660.146}
+{"client_id": "58dfe811-b125-488f-339d-d43958d19675", "event": "term", "scenario": "session_expire_after", "ticket": "MOCK-00000001", "ts": 1792950660.147, "was_alive": false}
+{"algo_id": "DEABB8C8-A2BC-48CA-8ED0-8CDF1BD62F61", "client_id": "dcaf59bc-8b7b-4e9f-3a71-3666106f62ad", "event": "module", "scenario": "session_expire_after", "ts": 1792950660.149}
+{"client_id": "dcaf59bc-8b7b-4e9f-3a71-3666106f62ad", "event": "ticket_issued", "scenario": "session_expire_after", "ticket": "MOCK-00000002", "ts": 1792950660.153}
+{"client_id": "dcaf59bc-8b7b-4e9f-3a71-3666106f62ad", "event": "auth_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000002", "ts": 1792950660.155, "user": "fake-user"}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950665.162}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950665.162}
+{"client_id": "dcaf59bc-8b7b-4e9f-3a71-3666106f62ad", "event": "keep_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000002", "ts": 1792950665.168}
+{"age": 6.02, "event": "session_expired", "scenario": "session_expire_after", "ticket": "MOCK-00000002", "ts": 1792950666.171}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950666.172}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950666.172}
+{"client_id": "dcaf59bc-8b7b-4e9f-3a71-3666106f62ad", "error_code": "300", "event": "keep_invalid", "scenario": "session_expire_after", "ticket": "MOCK-00000002", "ts": 1792950666.173}
+{"client_id": "dcaf59bc-8b7b-4e9f-3a71-3666106f62ad", "event": "term", "scenario": "session_expire_after", "ticket": "MOCK-00000002", "ts": 1792950666.173, "was_alive": false}
+{"algo_id": "DEABB8C8-A2BC-48CA-8ED0-8CDF1BD62F61", "client_id": "c904dbee-7c0d-4c95-9a1f-80b3733d018e", "event": "module", "scenario": "session_expire_after", "ts": 1792950666.175}
+{"client_id": "c904dbee-7c0d-4c95-9a1f-80b3733d018e", "event": "ticket_issued", "scenario": "session_expire_after", "ticket": "MOCK-00000003", "ts": 1792950666.181}
+{"client_id": "c904dbee-7c0d-4c95-9a1f-80b3733d018e", "event": "auth_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000003", "ts": 1792950666.182, "user": "fake-user"}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950671.191}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950671.192}
+{"client_id": "c904dbee-7c0d-4c95-9a1f-80b3733d018e", "event": "keep_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000003", "ts": 1792950671.192}
+{"age": 6.01, "event": "session_expired", "scenario": "session_expire_after", "ticket": "MOCK-00000003", "ts": 1792950672.194}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950672.194}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950672.194}
+{"client_id": "c904dbee-7c0d-4c95-9a1f-80b3733d018e", "error_code": "300", "event": "keep_invalid", "scenario": "session_expire_after", "ticket": "MOCK-00000003", "ts": 1792950672.195}
+{"client_id": "c904dbee-7c0d-4c95-9a1f-80b3733d018e", "event": "term", "scenario": "session_expire_after", "ticket": "MOCK-00000003", "ts": 1792950672.196, "was_alive": false}
+{"algo_id": "DEABB8C8-A2BC-48CA-8ED0-8CDF1BD62F61", "client_id": "60f62595-b55f-40b4-d91f-24678d891cd9", "event": "module", "scenario": "session_expire_after", "ts": 1792950672.202}
+{"client_id": "60f62595-b55f-40b4-d91f-24678d891cd9", "event": "ticket_issued", "scenario": "session_expire_after", "ticket": "MOCK-00000004", "ts": 1792950672.202}
+{"client_id": "60f62595-b55f-40b4-d91f-24678d891cd9", "event": "auth_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000004", "ts": 1792950672.203, "user": "fake-user"}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950677.209}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950677.209}
+{"client_id": "60f62595-b55f-40b4-d91f-24678d891cd9", "event": "keep_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000004", "ts": 1792950677.21}
+{"age": 6.01, "event": "session_expired", "scenario": "session_expire_after", "ticket": "MOCK-00000004", "ts": 1792950678.212}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950678.212}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950678.212}
+{"client_id": "60f62595-b55f-40b4-d91f-24678d891cd9", "error_code": "300", "event": "keep_invalid", "scenario": "session_expire_after", "ticket": "MOCK-00000004", "ts": 1792950678.217}
+{"client_id": "60f62595-b55f-40b4-d91f-24678d891cd9", "event": "term", "scenario": "session_expire_after", "ticket": "MOCK-00000004", "ts": 1792950678.217, "was_alive": false}
+{"algo_id": "DEABB8C8-A2BC-48CA-8ED0-8CDF1BD62F61", "client_id": "341101aa-816f-44b4-d618-fa28bb5c06cc", "event": "module", "scenario": "session_expire_after", "ts": 1792950678.218}
+{"client_id": "341101aa-816f-44b4-d618-fa28bb5c06cc", "event": "ticket_issued", "scenario": "session_expire_after", "ticket": "MOCK-00000005", "ts": 1792950678.219}
+{"client_id": "341101aa-816f-44b4-d618-fa28bb5c06cc", "event": "auth_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000005", "ts": 1792950678.219, "user": "fake-user"}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950683.222}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950683.222}
+{"client_id": "341101aa-816f-44b4-d618-fa28bb5c06cc", "event": "keep_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000005", "ts": 1792950683.223}
+{"age": 6.01, "event": "session_expired", "scenario": "session_expire_after", "ticket": "MOCK-00000005", "ts": 1792950684.226}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950684.226}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950684.226}
+{"client_id": "341101aa-816f-44b4-d618-fa28bb5c06cc", "error_code": "300", "event": "keep_invalid", "scenario": "session_expire_after", "ticket": "MOCK-00000005", "ts": 1792950684.226}
+{"client_id": "341101aa-816f-44b4-d618-fa28bb5c06cc", "event": "term", "scenario": "session_expire_after", "ticket": "MOCK-00000005", "ts": 1792950684.227, "was_alive": false}
+{"algo_id": "DEABB8C8-A2BC-48CA-8ED0-8CDF1BD62F61", "client_id": "a3790f23-eb73-4ca1-cb8d-e1ac77765d39", "event": "module", "scenario": "session_expire_after", "ts": 1792950684.228}
+{"client_id": "a3790f23-eb73-4ca1-cb8d-e1ac77765d39", "event": "ticket_issued", "scenario": "session_expire_after", "ticket": "MOCK-00000006", "ts": 1792950684.228}
+{"client_id": "a3790f23-eb73-4ca1-cb8d-e1ac77765d39", "event": "auth_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000006", "ts": 1792950684.229, "user": "fake-user"}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950689.239}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950689.239}
+{"client_id": "a3790f23-eb73-4ca1-cb8d-e1ac77765d39", "event": "keep_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000006", "ts": 1792950689.24}
+{"age": 6.01, "event": "session_expired", "scenario": "session_expire_after", "ticket": "MOCK-00000006", "ts": 1792950690.243}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950690.243}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950690.243}
+{"client_id": "a3790f23-eb73-4ca1-cb8d-e1ac77765d39", "error_code": "300", "event": "keep_invalid", "scenario": "session_expire_after", "ticket": "MOCK-00000006", "ts": 1792950690.243}
+{"client_id": "a3790f23-eb73-4ca1-cb8d-e1ac77765d39", "event": "term", "scenario": "session_expire_after", "ticket": "MOCK-00000006", "ts": 1792950690.244, "was_alive": false}
+{"algo_id": "DEABB8C8-A2BC-48CA-8ED0-8CDF1BD62F61", "client_id": "5034191b-4485-4f92-e3b6-ed8b4f73c2bb", "event": "module", "scenario": "session_expire_after", "ts": 1792950690.245}
+{"client_id": "5034191b-4485-4f92-e3b6-ed8b4f73c2bb", "event": "ticket_issued", "scenario": "session_expire_after", "ticket": "MOCK-00000007", "ts": 1792950690.245}
+{"client_id": "5034191b-4485-4f92-e3b6-ed8b4f73c2bb", "event": "auth_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000007", "ts": 1792950690.246, "user": "fake-user"}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950695.252}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950695.253}
+{"client_id": "5034191b-4485-4f92-e3b6-ed8b4f73c2bb", "event": "keep_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000007", "ts": 1792950695.253}
+{"age": 6.01, "event": "session_expired", "scenario": "session_expire_after", "ticket": "MOCK-00000007", "ts": 1792950696.254}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950696.255}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950696.255}
+{"client_id": "5034191b-4485-4f92-e3b6-ed8b4f73c2bb", "error_code": "300", "event": "keep_invalid", "scenario": "session_expire_after", "ticket": "MOCK-00000007", "ts": 1792950696.255}
+{"client_id": "5034191b-4485-4f92-e3b6-ed8b4f73c2bb", "event": "term", "scenario": "session_expire_after", "ticket": "MOCK-00000007", "ts": 1792950696.256, "was_alive": false}
+{"algo_id": "DEABB8C8-A2BC-48CA-8ED0-8CDF1BD62F61", "client_id": "86a613e2-62dd-429f-73e1-4b1d1b8e6bc0", "event": "module", "scenario": "session_expire_after", "ts": 1792950696.257}
+{"client_id": "86a613e2-62dd-429f-73e1-4b1d1b8e6bc0", "event": "ticket_issued", "scenario": "session_expire_after", "ticket": "MOCK-00000008", "ts": 1792950696.258}
+{"client_id": "86a613e2-62dd-429f-73e1-4b1d1b8e6bc0", "event": "auth_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000008", "ts": 1792950696.258, "user": "fake-user"}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950701.264}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950701.264}
+{"client_id": "86a613e2-62dd-429f-73e1-4b1d1b8e6bc0", "event": "keep_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000008", "ts": 1792950701.265}
+{"age": 6.02, "event": "session_expired", "scenario": "session_expire_after", "ticket": "MOCK-00000008", "ts": 1792950702.274}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950702.274}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950702.274}
+{"client_id": "86a613e2-62dd-429f-73e1-4b1d1b8e6bc0", "error_code": "300", "event": "keep_invalid", "scenario": "session_expire_after", "ticket": "MOCK-00000008", "ts": 1792950702.275}
+{"client_id": "86a613e2-62dd-429f-73e1-4b1d1b8e6bc0", "event": "term", "scenario": "session_expire_after", "ticket": "MOCK-00000008", "ts": 1792950702.283, "was_alive": false}
+{"algo_id": "DEABB8C8-A2BC-48CA-8ED0-8CDF1BD62F61", "client_id": "303a8342-ca8f-4c97-4fed-81369615876d", "event": "module", "scenario": "session_expire_after", "ts": 1792950702.284}
+{"client_id": "303a8342-ca8f-4c97-4fed-81369615876d", "event": "ticket_issued", "scenario": "session_expire_after", "ticket": "MOCK-00000009", "ts": 1792950702.284}
+{"client_id": "303a8342-ca8f-4c97-4fed-81369615876d", "event": "auth_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000009", "ts": 1792950702.285, "user": "fake-user"}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950707.291}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950707.291}
+{"client_id": "303a8342-ca8f-4c97-4fed-81369615876d", "event": "keep_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000009", "ts": 1792950707.292}
+{"age": 6.01, "event": "session_expired", "scenario": "session_expire_after", "ticket": "MOCK-00000009", "ts": 1792950708.298}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950708.298}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950708.298}
+{"client_id": "303a8342-ca8f-4c97-4fed-81369615876d", "error_code": "300", "event": "keep_invalid", "scenario": "session_expire_after", "ticket": "MOCK-00000009", "ts": 1792950708.299}
+{"client_id": "303a8342-ca8f-4c97-4fed-81369615876d", "event": "term", "scenario": "session_expire_after", "ticket": "MOCK-00000009", "ts": 1792950708.299, "was_alive": false}
+{"algo_id": "DEABB8C8-A2BC-48CA-8ED0-8CDF1BD62F61", "client_id": "e94ed786-38c9-41bf-935d-cbb3a25c7e50", "event": "module", "scenario": "session_expire_after", "ts": 1792950708.3}
+{"client_id": "e94ed786-38c9-41bf-935d-cbb3a25c7e50", "event": "ticket_issued", "scenario": "session_expire_after", "ticket": "MOCK-00000010", "ts": 1792950708.305}
+{"client_id": "e94ed786-38c9-41bf-935d-cbb3a25c7e50", "event": "auth_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000010", "ts": 1792950708.306, "user": "fake-user"}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950713.313}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950713.314}
+{"client_id": "e94ed786-38c9-41bf-935d-cbb3a25c7e50", "event": "keep_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000010", "ts": 1792950713.315}
+{"age": 6.01, "event": "session_expired", "scenario": "session_expire_after", "ticket": "MOCK-00000010", "ts": 1792950714.317}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950714.317}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950714.317}
+{"client_id": "e94ed786-38c9-41bf-935d-cbb3a25c7e50", "error_code": "300", "event": "keep_invalid", "scenario": "session_expire_after", "ticket": "MOCK-00000010", "ts": 1792950714.318}
+{"client_id": "e94ed786-38c9-41bf-935d-cbb3a25c7e50", "event": "term", "scenario": "session_expire_after", "ticket": "MOCK-00000010", "ts": 1792950714.318, "was_alive": false}
+{"algo_id": "DEABB8C8-A2BC-48CA-8ED0-8CDF1BD62F61", "client_id": "cbeda969-115a-4a83-8ba7-b14c180b04fe", "event": "module", "scenario": "session_expire_after", "ts": 1792950714.319}
+{"client_id": "cbeda969-115a-4a83-8ba7-b14c180b04fe", "event": "ticket_issued", "scenario": "session_expire_after", "ticket": "MOCK-00000011", "ts": 1792950714.32}
+{"client_id": "cbeda969-115a-4a83-8ba7-b14c180b04fe", "event": "auth_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000011", "ts": 1792950714.321, "user": "fake-user"}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950719.327}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950719.327}
+{"client_id": "cbeda969-115a-4a83-8ba7-b14c180b04fe", "event": "keep_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000011", "ts": 1792950719.328}
+{"age": 6.01, "event": "session_expired", "scenario": "session_expire_after", "ticket": "MOCK-00000011", "ts": 1792950720.334}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950720.334}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950720.334}
+{"client_id": "cbeda969-115a-4a83-8ba7-b14c180b04fe", "error_code": "300", "event": "keep_invalid", "scenario": "session_expire_after", "ticket": "MOCK-00000011", "ts": 1792950720.335}
+{"client_id": "cbeda969-115a-4a83-8ba7-b14c180b04fe", "event": "term", "scenario": "session_expire_after", "ticket": "MOCK-00000011", "ts": 1792950720.335, "was_alive": false}
+{"algo_id": "DEABB8C8-A2BC-48CA-8ED0-8CDF1BD62F61", "client_id": "6848ba9c-9daa-4892-9a60-91717332d477", "event": "module", "scenario": "session_expire_after", "ts": 1792950720.337}
+{"client_id": "6848ba9c-9daa-4892-9a60-91717332d477", "event": "ticket_issued", "scenario": "session_expire_after", "ticket": "MOCK-00000012", "ts": 1792950720.337}
+{"client_id": "6848ba9c-9daa-4892-9a60-91717332d477", "event": "auth_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000012", "ts": 1792950720.338, "user": "fake-user"}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950725.34}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950725.341}
+{"client_id": "6848ba9c-9daa-4892-9a60-91717332d477", "event": "keep_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000012", "ts": 1792950725.341}
+{"age": 6.01, "event": "session_expired", "scenario": "session_expire_after", "ticket": "MOCK-00000012", "ts": 1792950726.344}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950726.344}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950726.344}
+{"client_id": "6848ba9c-9daa-4892-9a60-91717332d477", "error_code": "300", "event": "keep_invalid", "scenario": "session_expire_after", "ticket": "MOCK-00000012", "ts": 1792950726.344}
+{"client_id": "6848ba9c-9daa-4892-9a60-91717332d477", "event": "term", "scenario": "session_expire_after", "ticket": "MOCK-00000012", "ts": 1792950726.349, "was_alive": false}
+{"algo_id": "DEABB8C8-A2BC-48CA-8ED0-8CDF1BD62F61", "client_id": "03166379-41b4-43bd-a219-7aa60734bc71", "event": "module", "scenario": "session_expire_after", "ts": 1792950726.35}
+{"client_id": "03166379-41b4-43bd-a219-7aa60734bc71", "event": "ticket_issued", "scenario": "session_expire_after", "ticket": "MOCK-00000013", "ts": 1792950726.351}
+{"client_id": "03166379-41b4-43bd-a219-7aa60734bc71", "event": "auth_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000013", "ts": 1792950726.352, "user": "fake-user"}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950731.358}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950731.358}
+{"client_id": "03166379-41b4-43bd-a219-7aa60734bc71", "event": "keep_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000013", "ts": 1792950731.359}
+{"age": 6.01, "event": "session_expired", "scenario": "session_expire_after", "ticket": "MOCK-00000013", "ts": 1792950732.361}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950732.362}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950732.362}
+{"client_id": "03166379-41b4-43bd-a219-7aa60734bc71", "error_code": "300", "event": "keep_invalid", "scenario": "session_expire_after", "ticket": "MOCK-00000013", "ts": 1792950732.363}
+{"client_id": "03166379-41b4-43bd-a219-7aa60734bc71", "event": "term", "scenario": "session_expire_after", "ticket": "MOCK-00000013", "ts": 1792950732.364, "was_alive": false}
+{"algo_id": "DEABB8C8-A2BC-48CA-8ED0-8CDF1BD62F61", "client_id": "95ed82d0-2424-48b3-b10f-872b0f8a335a", "event": "module", "scenario": "session_expire_after", "ts": 1792950732.365}
+{"client_id": "95ed82d0-2424-48b3-b10f-872b0f8a335a", "event": "ticket_issued", "scenario": "session_expire_after", "ticket": "MOCK-00000014", "ts": 1792950732.366}
+{"client_id": "95ed82d0-2424-48b3-b10f-872b0f8a335a", "event": "auth_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000014", "ts": 1792950732.367, "user": "fake-user"}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950737.375}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950737.375}
+{"client_id": "95ed82d0-2424-48b3-b10f-872b0f8a335a", "event": "keep_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000014", "ts": 1792950737.375}
+{"age": 6.01, "event": "session_expired", "scenario": "session_expire_after", "ticket": "MOCK-00000014", "ts": 1792950738.381}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950738.381}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950738.381}
+{"client_id": "95ed82d0-2424-48b3-b10f-872b0f8a335a", "error_code": "300", "event": "keep_invalid", "scenario": "session_expire_after", "ticket": "MOCK-00000014", "ts": 1792950738.382}
+{"client_id": "95ed82d0-2424-48b3-b10f-872b0f8a335a", "event": "term", "scenario": "session_expire_after", "ticket": "MOCK-00000014", "ts": 1792950738.383, "was_alive": false}
+{"algo_id": "DEABB8C8-A2BC-48CA-8ED0-8CDF1BD62F61", "client_id": "6c3b543c-1a06-448d-e590-76f45596c59b", "event": "module", "scenario": "session_expire_after", "ts": 1792950738.384}
+{"client_id": "6c3b543c-1a06-448d-e590-76f45596c59b", "event": "ticket_issued", "scenario": "session_expire_after", "ticket": "MOCK-00000015", "ts": 1792950738.384}
+{"client_id": "6c3b543c-1a06-448d-e590-76f45596c59b", "event": "auth_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000015", "ts": 1792950738.389, "user": "fake-user"}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950743.392}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950743.393}
+{"client_id": "6c3b543c-1a06-448d-e590-76f45596c59b", "event": "keep_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000015", "ts": 1792950743.393}
+{"age": 6.01, "event": "session_expired", "scenario": "session_expire_after", "ticket": "MOCK-00000015", "ts": 1792950744.399}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950744.399}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950744.399}
+{"client_id": "6c3b543c-1a06-448d-e590-76f45596c59b", "error_code": "300", "event": "keep_invalid", "scenario": "session_expire_after", "ticket": "MOCK-00000015", "ts": 1792950744.4}
+{"client_id": "6c3b543c-1a06-448d-e590-76f45596c59b", "event": "term", "scenario": "session_expire_after", "ticket": "MOCK-00000015", "ts": 1792950744.4, "was_alive": false}
+{"algo_id": "DEABB8C8-A2BC-48CA-8ED0-8CDF1BD62F61", "client_id": "fb7479d4-1d7c-4c8b-6aa2-64cc427a6f84", "event": "module", "scenario": "session_expire_after", "ts": 1792950744.401}
+{"client_id": "fb7479d4-1d7c-4c8b-6aa2-64cc427a6f84", "event": "ticket_issued", "scenario": "session_expire_after", "ticket": "MOCK-00000016", "ts": 1792950744.402}
+{"client_id": "fb7479d4-1d7c-4c8b-6aa2-64cc427a6f84", "event": "auth_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000016", "ts": 1792950744.402, "user": "fake-user"}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950749.405}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950749.405}
+{"client_id": "fb7479d4-1d7c-4c8b-6aa2-64cc427a6f84", "event": "keep_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000016", "ts": 1792950749.411}
+{"age": 6.01, "event": "session_expired", "scenario": "session_expire_after", "ticket": "MOCK-00000016", "ts": 1792950750.415}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950750.415}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950750.415}
+{"client_id": "fb7479d4-1d7c-4c8b-6aa2-64cc427a6f84", "error_code": "300", "event": "keep_invalid", "scenario": "session_expire_after", "ticket": "MOCK-00000016", "ts": 1792950750.416}
+{"client_id": "fb7479d4-1d7c-4c8b-6aa2-64cc427a6f84", "event": "term", "scenario": "session_expire_after", "ticket": "MOCK-00000016", "ts": 1792950750.417, "was_alive": false}
+{"algo_id": "DEABB8C8-A2BC-48CA-8ED0-8CDF1BD62F61", "client_id": "189642fc-a7e3-4c8d-b0e0-500b730c65b1", "event": "module", "scenario": "session_expire_after", "ts": 1792950750.418}
+{"client_id": "189642fc-a7e3-4c8d-b0e0-500b730c65b1", "event": "ticket_issued", "scenario": "session_expire_after", "ticket": "MOCK-00000017", "ts": 1792950750.424}
+{"client_id": "189642fc-a7e3-4c8d-b0e0-500b730c65b1", "event": "auth_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000017", "ts": 1792950750.425, "user": "fake-user"}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950755.429}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950755.43}
+{"client_id": "189642fc-a7e3-4c8d-b0e0-500b730c65b1", "event": "keep_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000017", "ts": 1792950755.431}
+{"age": 6.01, "event": "session_expired", "scenario": "session_expire_after", "ticket": "MOCK-00000017", "ts": 1792950756.438}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950756.438}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950756.438}
+{"client_id": "189642fc-a7e3-4c8d-b0e0-500b730c65b1", "error_code": "300", "event": "keep_invalid", "scenario": "session_expire_after", "ticket": "MOCK-00000017", "ts": 1792950756.439}
+{"client_id": "189642fc-a7e3-4c8d-b0e0-500b730c65b1", "event": "term", "scenario": "session_expire_after", "ticket": "MOCK-00000017", "ts": 1792950756.439, "was_alive": false}
+{"algo_id": "DEABB8C8-A2BC-48CA-8ED0-8CDF1BD62F61", "client_id": "0b3b0695-4141-4d9b-64fc-b39f8c6684d7", "event": "module", "scenario": "session_expire_after", "ts": 1792950756.44}
+{"client_id": "0b3b0695-4141-4d9b-64fc-b39f8c6684d7", "event": "ticket_issued", "scenario": "session_expire_after", "ticket": "MOCK-00000018", "ts": 1792950756.441}
+{"client_id": "0b3b0695-4141-4d9b-64fc-b39f8c6684d7", "event": "auth_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000018", "ts": 1792950756.442, "user": "fake-user"}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950761.451}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950761.451}
+{"client_id": "0b3b0695-4141-4d9b-64fc-b39f8c6684d7", "event": "keep_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000018", "ts": 1792950761.452}
+{"age": 6.02, "event": "session_expired", "scenario": "session_expire_after", "ticket": "MOCK-00000018", "ts": 1792950762.458}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950762.458}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950762.458}
+{"client_id": "0b3b0695-4141-4d9b-64fc-b39f8c6684d7", "error_code": "300", "event": "keep_invalid", "scenario": "session_expire_after", "ticket": "MOCK-00000018", "ts": 1792950762.459}
+{"client_id": "0b3b0695-4141-4d9b-64fc-b39f8c6684d7", "event": "term", "scenario": "session_expire_after", "ticket": "MOCK-00000018", "ts": 1792950762.459, "was_alive": false}
+{"algo_id": "DEABB8C8-A2BC-48CA-8ED0-8CDF1BD62F61", "client_id": "b1007471-7fff-4482-4c82-d6ff02677b79", "event": "module", "scenario": "session_expire_after", "ts": 1792950762.461}
+{"client_id": "b1007471-7fff-4482-4c82-d6ff02677b79", "event": "ticket_issued", "scenario": "session_expire_after", "ticket": "MOCK-00000019", "ts": 1792950762.461}
+{"client_id": "b1007471-7fff-4482-4c82-d6ff02677b79", "event": "auth_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000019", "ts": 1792950762.462, "user": "fake-user"}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950767.469}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950767.469}
+{"client_id": "b1007471-7fff-4482-4c82-d6ff02677b79", "event": "keep_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000019", "ts": 1792950767.47}
+{"age": 6.01, "event": "session_expired", "scenario": "session_expire_after", "ticket": "MOCK-00000019", "ts": 1792950768.471}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950768.472}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950768.472}
+{"client_id": "b1007471-7fff-4482-4c82-d6ff02677b79", "error_code": "300", "event": "keep_invalid", "scenario": "session_expire_after", "ticket": "MOCK-00000019", "ts": 1792950768.472}
+{"client_id": "b1007471-7fff-4482-4c82-d6ff02677b79", "event": "term", "scenario": "session_expire_after", "ticket": "MOCK-00000019", "ts": 1792950768.478, "was_alive": false}
+{"algo_id": "DEABB8C8-A2BC-48CA-8ED0-8CDF1BD62F61", "client_id": "26161022-a4d6-4d8b-cca1-ad077de52baf", "event": "module", "scenario": "session_expire_after", "ts": 1792950768.48}
+{"client_id": "26161022-a4d6-4d8b-cca1-ad077de52baf", "event": "ticket_issued", "scenario": "session_expire_after", "ticket": "MOCK-00000020", "ts": 1792950768.481}
+{"client_id": "26161022-a4d6-4d8b-cca1-ad077de52baf", "event": "auth_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000020", "ts": 1792950768.482, "user": "fake-user"}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950773.488}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950773.488}
+{"client_id": "26161022-a4d6-4d8b-cca1-ad077de52baf", "event": "keep_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000020", "ts": 1792950773.489}
+{"age": 6.02, "event": "session_expired", "scenario": "session_expire_after", "ticket": "MOCK-00000020", "ts": 1792950774.499}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950774.499}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950774.499}
+{"client_id": "26161022-a4d6-4d8b-cca1-ad077de52baf", "error_code": "300", "event": "keep_invalid", "scenario": "session_expire_after", "ticket": "MOCK-00000020", "ts": 1792950774.5}
+{"client_id": "26161022-a4d6-4d8b-cca1-ad077de52baf", "event": "term", "scenario": "session_expire_after", "ticket": "MOCK-00000020", "ts": 1792950774.501, "was_alive": false}
+{"algo_id": "DEABB8C8-A2BC-48CA-8ED0-8CDF1BD62F61", "client_id": "2666b586-d305-4d8e-fb5e-7d781732819a", "event": "module", "scenario": "session_expire_after", "ts": 1792950774.502}
+{"client_id": "2666b586-d305-4d8e-fb5e-7d781732819a", "event": "ticket_issued", "scenario": "session_expire_after", "ticket": "MOCK-00000021", "ts": 1792950774.502}
+{"client_id": "2666b586-d305-4d8e-fb5e-7d781732819a", "event": "auth_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000021", "ts": 1792950774.503, "user": "fake-user"}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950779.509}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950779.509}
+{"client_id": "2666b586-d305-4d8e-fb5e-7d781732819a", "event": "keep_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000021", "ts": 1792950779.51}
+{"age": 6.01, "event": "session_expired", "scenario": "session_expire_after", "ticket": "MOCK-00000021", "ts": 1792950780.516}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950780.516}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950780.516}
+{"client_id": "2666b586-d305-4d8e-fb5e-7d781732819a", "error_code": "300", "event": "keep_invalid", "scenario": "session_expire_after", "ticket": "MOCK-00000021", "ts": 1792950780.517}
+{"client_id": "2666b586-d305-4d8e-fb5e-7d781732819a", "event": "term", "scenario": "session_expire_after", "ticket": "MOCK-00000021", "ts": 1792950780.518, "was_alive": false}
+{"algo_id": "DEABB8C8-A2BC-48CA-8ED0-8CDF1BD62F61", "client_id": "e033cc5a-3683-428e-8766-0b62f80ba983", "event": "module", "scenario": "session_expire_after", "ts": 1792950780.519}
+{"client_id": "e033cc5a-3683-428e-8766-0b62f80ba983", "event": "ticket_issued", "scenario": "session_expire_after", "ticket": "MOCK-00000022", "ts": 1792950780.519}
+{"client_id": "e033cc5a-3683-428e-8766-0b62f80ba983", "event": "auth_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000022", "ts": 1792950780.525, "user": "fake-user"}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950785.531}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950785.532}
+{"client_id": "e033cc5a-3683-428e-8766-0b62f80ba983", "event": "keep_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000022", "ts": 1792950785.532}
+{"age": 6.01, "event": "session_expired", "scenario": "session_expire_after", "ticket": "MOCK-00000022", "ts": 1792950786.538}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950786.538}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950786.538}
+{"client_id": "e033cc5a-3683-428e-8766-0b62f80ba983", "error_code": "300", "event": "keep_invalid", "scenario": "session_expire_after", "ticket": "MOCK-00000022", "ts": 1792950786.539}
+{"client_id": "e033cc5a-3683-428e-8766-0b62f80ba983", "event": "term", "scenario": "session_expire_after", "ticket": "MOCK-00000022", "ts": 1792950786.54, "was_alive": false}
+{"algo_id": "DEABB8C8-A2BC-48CA-8ED0-8CDF1BD62F61", "client_id": "5727dadb-8ee3-4e96-5938-9efddaca7565", "event": "module", "scenario": "session_expire_after", "ts": 1792950786.546}
+{"client_id": "5727dadb-8ee3-4e96-5938-9efddaca7565", "event": "ticket_issued", "scenario": "session_expire_after", "ticket": "MOCK-00000023", "ts": 1792950786.547}
+{"client_id": "5727dadb-8ee3-4e96-5938-9efddaca7565", "event": "auth_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000023", "ts": 1792950786.548, "user": "fake-user"}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950791.55}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950791.55}
+{"client_id": "5727dadb-8ee3-4e96-5938-9efddaca7565", "event": "keep_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000023", "ts": 1792950791.551}
+{"age": 6.01, "event": "session_expired", "scenario": "session_expire_after", "ticket": "MOCK-00000023", "ts": 1792950792.557}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950792.557}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950792.557}
+{"client_id": "5727dadb-8ee3-4e96-5938-9efddaca7565", "error_code": "300", "event": "keep_invalid", "scenario": "session_expire_after", "ticket": "MOCK-00000023", "ts": 1792950792.563}
+{"client_id": "5727dadb-8ee3-4e96-5938-9efddaca7565", "event": "term", "scenario": "session_expire_after", "ticket": "MOCK-00000023", "ts": 1792950792.564, "was_alive": false}
+{"algo_id": "DEABB8C8-A2BC-48CA-8ED0-8CDF1BD62F61", "client_id": "0da5a18d-7595-488c-0375-bc13d5ef3152", "event": "module", "scenario": "session_expire_after", "ts": 1792950792.565}
+{"client_id": "0da5a18d-7595-488c-0375-bc13d5ef3152", "event": "ticket_issued", "scenario": "session_expire_after", "ticket": "MOCK-00000024", "ts": 1792950792.565}
+{"client_id": "0da5a18d-7595-488c-0375-bc13d5ef3152", "event": "auth_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000024", "ts": 1792950792.566, "user": "fake-user"}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950797.576}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950797.576}
+{"client_id": "0da5a18d-7595-488c-0375-bc13d5ef3152", "event": "keep_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000024", "ts": 1792950797.577}
+{"age": 6.01, "event": "session_expired", "scenario": "session_expire_after", "ticket": "MOCK-00000024", "ts": 1792950798.581}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950798.581}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950798.581}
+{"client_id": "0da5a18d-7595-488c-0375-bc13d5ef3152", "error_code": "300", "event": "keep_invalid", "scenario": "session_expire_after", "ticket": "MOCK-00000024", "ts": 1792950798.582}
+{"client_id": "0da5a18d-7595-488c-0375-bc13d5ef3152", "event": "term", "scenario": "session_expire_after", "ticket": "MOCK-00000024", "ts": 1792950798.588, "was_alive": false}
+{"algo_id": "DEABB8C8-A2BC-48CA-8ED0-8CDF1BD62F61", "client_id": "36c78e6d-4fd4-4e9d-3218-1d4f221ab029", "event": "module", "scenario": "session_expire_after", "ts": 1792950798.589}
+{"client_id": "36c78e6d-4fd4-4e9d-3218-1d4f221ab029", "event": "ticket_issued", "scenario": "session_expire_after", "ticket": "MOCK-00000025", "ts": 1792950798.59}
+{"client_id": "36c78e6d-4fd4-4e9d-3218-1d4f221ab029", "event": "auth_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000025", "ts": 1792950798.591, "user": "fake-user"}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950803.596}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950803.596}
+{"client_id": "36c78e6d-4fd4-4e9d-3218-1d4f221ab029", "event": "keep_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000025", "ts": 1792950803.597}
+{"age": 6.01, "event": "session_expired", "scenario": "session_expire_after", "ticket": "MOCK-00000025", "ts": 1792950804.601}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950804.601}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950804.601}
+{"client_id": "36c78e6d-4fd4-4e9d-3218-1d4f221ab029", "error_code": "300", "event": "keep_invalid", "scenario": "session_expire_after", "ticket": "MOCK-00000025", "ts": 1792950804.602}
+{"client_id": "36c78e6d-4fd4-4e9d-3218-1d4f221ab029", "event": "term", "scenario": "session_expire_after", "ticket": "MOCK-00000025", "ts": 1792950804.603, "was_alive": false}
+{"algo_id": "DEABB8C8-A2BC-48CA-8ED0-8CDF1BD62F61", "client_id": "1b6f2294-df21-4182-37b1-1694e56a8dbd", "event": "module", "scenario": "session_expire_after", "ts": 1792950804.605}
+{"client_id": "1b6f2294-df21-4182-37b1-1694e56a8dbd", "event": "ticket_issued", "scenario": "session_expire_after", "ticket": "MOCK-00000026", "ts": 1792950804.606}
+{"client_id": "1b6f2294-df21-4182-37b1-1694e56a8dbd", "event": "auth_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000026", "ts": 1792950804.607, "user": "fake-user"}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950809.613}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950809.613}
+{"client_id": "1b6f2294-df21-4182-37b1-1694e56a8dbd", "event": "keep_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000026", "ts": 1792950809.614}
+{"age": 6.01, "event": "session_expired", "scenario": "session_expire_after", "ticket": "MOCK-00000026", "ts": 1792950810.618}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950810.618}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950810.618}
+{"client_id": "1b6f2294-df21-4182-37b1-1694e56a8dbd", "error_code": "300", "event": "keep_invalid", "scenario": "session_expire_after", "ticket": "MOCK-00000026", "ts": 1792950810.619}
+{"client_id": "1b6f2294-df21-4182-37b1-1694e56a8dbd", "event": "term", "scenario": "session_expire_after", "ticket": "MOCK-00000026", "ts": 1792950810.62, "was_alive": false}
+{"algo_id": "DEABB8C8-A2BC-48CA-8ED0-8CDF1BD62F61", "client_id": "7a0e2c1e-f9f6-48bc-5e4d-83c35f923e5e", "event": "module", "scenario": "session_expire_after", "ts": 1792950810.621}
+{"client_id": "7a0e2c1e-f9f6-48bc-5e4d-83c35f923e5e", "event": "ticket_issued", "scenario": "session_expire_after", "ticket": "MOCK-00000027", "ts": 1792950810.622}
+{"client_id": "7a0e2c1e-f9f6-48bc-5e4d-83c35f923e5e", "event": "auth_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000027", "ts": 1792950810.623, "user": "fake-user"}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950815.631}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950815.631}
+{"client_id": "7a0e2c1e-f9f6-48bc-5e4d-83c35f923e5e", "event": "keep_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000027", "ts": 1792950815.632}
+{"age": 6.02, "event": "session_expired", "scenario": "session_expire_after", "ticket": "MOCK-00000027", "ts": 1792950816.639}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950816.642}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950816.642}
+{"client_id": "7a0e2c1e-f9f6-48bc-5e4d-83c35f923e5e", "error_code": "300", "event": "keep_invalid", "scenario": "session_expire_after", "ticket": "MOCK-00000027", "ts": 1792950816.646}
+{"client_id": "7a0e2c1e-f9f6-48bc-5e4d-83c35f923e5e", "event": "term", "scenario": "session_expire_after", "ticket": "MOCK-00000027", "ts": 1792950816.652, "was_alive": false}
+{"algo_id": "DEABB8C8-A2BC-48CA-8ED0-8CDF1BD62F61", "client_id": "9169ca53-42a1-4e9f-18c2-0af49e80b888", "event": "module", "scenario": "session_expire_after", "ts": 1792950816.654}
+{"client_id": "9169ca53-42a1-4e9f-18c2-0af49e80b888", "event": "ticket_issued", "scenario": "session_expire_after", "ticket": "MOCK-00000028", "ts": 1792950816.654}
+{"client_id": "9169ca53-42a1-4e9f-18c2-0af49e80b888", "event": "auth_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000028", "ts": 1792950816.655, "user": "fake-user"}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950821.661}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950821.661}
+{"client_id": "9169ca53-42a1-4e9f-18c2-0af49e80b888", "event": "keep_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000028", "ts": 1792950821.662}
+{"age": 6.01, "event": "session_expired", "scenario": "session_expire_after", "ticket": "MOCK-00000028", "ts": 1792950822.668}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950822.669}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950822.669}
+{"client_id": "9169ca53-42a1-4e9f-18c2-0af49e80b888", "error_code": "300", "event": "keep_invalid", "scenario": "session_expire_after", "ticket": "MOCK-00000028", "ts": 1792950822.674}
+{"client_id": "9169ca53-42a1-4e9f-18c2-0af49e80b888", "event": "term", "scenario": "session_expire_after", "ticket": "MOCK-00000028", "ts": 1792950822.675, "was_alive": false}
+{"algo_id": "DEABB8C8-A2BC-48CA-8ED0-8CDF1BD62F61", "client_id": "cfdec0f2-390f-4f8b-66c3-69d513b17cb6", "event": "module", "scenario": "session_expire_after", "ts": 1792950822.676}
+{"client_id": "cfdec0f2-390f-4f8b-66c3-69d513b17cb6", "event": "ticket_issued", "scenario": "session_expire_after", "ticket": "MOCK-00000029", "ts": 1792950822.677}
+{"client_id": "cfdec0f2-390f-4f8b-66c3-69d513b17cb6", "event": "auth_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000029", "ts": 1792950822.678, "user": "fake-user"}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950827.685}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950827.685}
+{"client_id": "cfdec0f2-390f-4f8b-66c3-69d513b17cb6", "event": "keep_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000029", "ts": 1792950827.685}
+{"age": 6.01, "event": "session_expired", "scenario": "session_expire_after", "ticket": "MOCK-00000029", "ts": 1792950828.691}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950828.692}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950828.692}
+{"client_id": "cfdec0f2-390f-4f8b-66c3-69d513b17cb6", "error_code": "300", "event": "keep_invalid", "scenario": "session_expire_after", "ticket": "MOCK-00000029", "ts": 1792950828.692}
+{"client_id": "cfdec0f2-390f-4f8b-66c3-69d513b17cb6", "event": "term", "scenario": "session_expire_after", "ticket": "MOCK-00000029", "ts": 1792950828.693, "was_alive": false}
+{"algo_id": "DEABB8C8-A2BC-48CA-8ED0-8CDF1BD62F61", "client_id": "604e7bcd-1658-4aa4-ca2c-56ae2742f127", "event": "module", "scenario": "session_expire_after", "ts": 1792950828.694}
+{"client_id": "604e7bcd-1658-4aa4-ca2c-56ae2742f127", "event": "ticket_issued", "scenario": "session_expire_after", "ticket": "MOCK-00000030", "ts": 1792950828.695}
+{"client_id": "604e7bcd-1658-4aa4-ca2c-56ae2742f127", "event": "auth_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000030", "ts": 1792950828.7, "user": "fake-user"}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950833.707}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950833.707}
+{"client_id": "604e7bcd-1658-4aa4-ca2c-56ae2742f127", "event": "keep_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000030", "ts": 1792950833.708}
+{"age": 6.01, "event": "session_expired", "scenario": "session_expire_after", "ticket": "MOCK-00000030", "ts": 1792950834.713}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950834.714}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950834.714}
+{"client_id": "604e7bcd-1658-4aa4-ca2c-56ae2742f127", "error_code": "300", "event": "keep_invalid", "scenario": "session_expire_after", "ticket": "MOCK-00000030", "ts": 1792950834.719}
+{"client_id": "604e7bcd-1658-4aa4-ca2c-56ae2742f127", "event": "term", "scenario": "session_expire_after", "ticket": "MOCK-00000030", "ts": 1792950834.72, "was_alive": false}
+{"algo_id": "DEABB8C8-A2BC-48CA-8ED0-8CDF1BD62F61", "client_id": "228e1b7e-c9b1-458a-7cdb-42c434752817", "event": "module", "scenario": "session_expire_after", "ts": 1792950834.721}
+{"client_id": "228e1b7e-c9b1-458a-7cdb-42c434752817", "event": "ticket_issued", "scenario": "session_expire_after", "ticket": "MOCK-00000031", "ts": 1792950834.722}
+{"client_id": "228e1b7e-c9b1-458a-7cdb-42c434752817", "event": "auth_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000031", "ts": 1792950834.723, "user": "fake-user"}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950839.727}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950839.727}
+{"client_id": "228e1b7e-c9b1-458a-7cdb-42c434752817", "event": "keep_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000031", "ts": 1792950839.728}
+{"age": 6.01, "event": "session_expired", "scenario": "session_expire_after", "ticket": "MOCK-00000031", "ts": 1792950840.729}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950840.73}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950840.73}
+{"client_id": "228e1b7e-c9b1-458a-7cdb-42c434752817", "error_code": "300", "event": "keep_invalid", "scenario": "session_expire_after", "ticket": "MOCK-00000031", "ts": 1792950840.73}
+{"client_id": "228e1b7e-c9b1-458a-7cdb-42c434752817", "event": "term", "scenario": "session_expire_after", "ticket": "MOCK-00000031", "ts": 1792950840.731, "was_alive": false}
+{"algo_id": "DEABB8C8-A2BC-48CA-8ED0-8CDF1BD62F61", "client_id": "944496a9-b9a4-49a9-49ba-8c1a96151397", "event": "module", "scenario": "session_expire_after", "ts": 1792950840.732}
+{"client_id": "944496a9-b9a4-49a9-49ba-8c1a96151397", "event": "ticket_issued", "scenario": "session_expire_after", "ticket": "MOCK-00000032", "ts": 1792950840.738}
+{"client_id": "944496a9-b9a4-49a9-49ba-8c1a96151397", "event": "auth_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000032", "ts": 1792950840.739, "user": "fake-user"}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950845.743}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950845.743}
+{"client_id": "944496a9-b9a4-49a9-49ba-8c1a96151397", "event": "keep_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000032", "ts": 1792950845.744}
+{"age": 6.01, "event": "session_expired", "scenario": "session_expire_after", "ticket": "MOCK-00000032", "ts": 1792950846.75}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950846.75}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950846.75}
+{"client_id": "944496a9-b9a4-49a9-49ba-8c1a96151397", "error_code": "300", "event": "keep_invalid", "scenario": "session_expire_after", "ticket": "MOCK-00000032", "ts": 1792950846.755}
+{"client_id": "944496a9-b9a4-49a9-49ba-8c1a96151397", "event": "term", "scenario": "session_expire_after", "ticket": "MOCK-00000032", "ts": 1792950846.756, "was_alive": false}
+{"algo_id": "DEABB8C8-A2BC-48CA-8ED0-8CDF1BD62F61", "client_id": "fca25bd5-6fad-479b-2e68-d96ed16e7c83", "event": "module", "scenario": "session_expire_after", "ts": 1792950846.758}
+{"client_id": "fca25bd5-6fad-479b-2e68-d96ed16e7c83", "event": "ticket_issued", "scenario": "session_expire_after", "ticket": "MOCK-00000033", "ts": 1792950846.759}
+{"client_id": "fca25bd5-6fad-479b-2e68-d96ed16e7c83", "event": "auth_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000033", "ts": 1792950846.76, "user": "fake-user"}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950851.768}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950851.769}
+{"client_id": "fca25bd5-6fad-479b-2e68-d96ed16e7c83", "event": "keep_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000033", "ts": 1792950851.769}
+{"age": 6.02, "event": "session_expired", "scenario": "session_expire_after", "ticket": "MOCK-00000033", "ts": 1792950852.779}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950852.779}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950852.779}
+{"client_id": "fca25bd5-6fad-479b-2e68-d96ed16e7c83", "error_code": "300", "event": "keep_invalid", "scenario": "session_expire_after", "ticket": "MOCK-00000033", "ts": 1792950852.78}
+{"client_id": "fca25bd5-6fad-479b-2e68-d96ed16e7c83", "event": "term", "scenario": "session_expire_after", "ticket": "MOCK-00000033", "ts": 1792950852.781, "was_alive": false}
+{"algo_id": "DEABB8C8-A2BC-48CA-8ED0-8CDF1BD62F61", "client_id": "fc9390d0-cb5b-4499-b1e5-66e1c4e5c3f6", "event": "module", "scenario": "session_expire_after", "ts": 1792950852.782}
+{"client_id": "fc9390d0-cb5b-4499-b1e5-66e1c4e5c3f6", "event": "ticket_issued", "scenario": "session_expire_after", "ticket": "MOCK-00000034", "ts": 1792950852.783}
+{"client_id": "fc9390d0-cb5b-4499-b1e5-66e1c4e5c3f6", "event": "auth_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000034", "ts": 1792950852.784, "user": "fake-user"}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950857.791}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950857.791}
+{"client_id": "fc9390d0-cb5b-4499-b1e5-66e1c4e5c3f6", "event": "keep_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000034", "ts": 1792950857.792}
+{"age": 6.01, "event": "session_expired", "scenario": "session_expire_after", "ticket": "MOCK-00000034", "ts": 1792950858.796}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950858.796}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950858.796}
+{"client_id": "fc9390d0-cb5b-4499-b1e5-66e1c4e5c3f6", "error_code": "300", "event": "keep_invalid", "scenario": "session_expire_after", "ticket": "MOCK-00000034", "ts": 1792950858.797}
+{"client_id": "fc9390d0-cb5b-4499-b1e5-66e1c4e5c3f6", "event": "term", "scenario": "session_expire_after", "ticket": "MOCK-00000034", "ts": 1792950858.798, "was_alive": false}
+{"algo_id": "DEABB8C8-A2BC-48CA-8ED0-8CDF1BD62F61", "client_id": "413f843e-390b-47ac-8630-5bfee9449885", "event": "module", "scenario": "session_expire_after", "ts": 1792950858.799}
+{"client_id": "413f843e-390b-47ac-8630-5bfee9449885", "event": "ticket_issued", "scenario": "session_expire_after", "ticket": "MOCK-00000035", "ts": 1792950858.799}
+{"client_id": "413f843e-390b-47ac-8630-5bfee9449885", "event": "auth_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000035", "ts": 1792950858.8, "user": "fake-user"}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950863.807}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950863.807}
+{"client_id": "413f843e-390b-47ac-8630-5bfee9449885", "event": "keep_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000035", "ts": 1792950863.808}
+{"age": 6.01, "event": "session_expired", "scenario": "session_expire_after", "ticket": "MOCK-00000035", "ts": 1792950864.814}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950864.814}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950864.814}
+{"client_id": "413f843e-390b-47ac-8630-5bfee9449885", "error_code": "300", "event": "keep_invalid", "scenario": "session_expire_after", "ticket": "MOCK-00000035", "ts": 1792950864.815}
+{"client_id": "413f843e-390b-47ac-8630-5bfee9449885", "event": "term", "scenario": "session_expire_after", "ticket": "MOCK-00000035", "ts": 1792950864.816, "was_alive": false}
+{"algo_id": "DEABB8C8-A2BC-48CA-8ED0-8CDF1BD62F61", "client_id": "5c414e0d-dad7-41bd-5727-523d83bff6ef", "event": "module", "scenario": "session_expire_after", "ts": 1792950864.817}
+{"client_id": "5c414e0d-dad7-41bd-5727-523d83bff6ef", "event": "ticket_issued", "scenario": "session_expire_after", "ticket": "MOCK-00000036", "ts": 1792950864.823}
+{"client_id": "5c414e0d-dad7-41bd-5727-523d83bff6ef", "event": "auth_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000036", "ts": 1792950864.824, "user": "fake-user"}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950869.829}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950869.83}
+{"client_id": "5c414e0d-dad7-41bd-5727-523d83bff6ef", "event": "keep_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000036", "ts": 1792950869.83}
+{"age": 6.01, "event": "session_expired", "scenario": "session_expire_after", "ticket": "MOCK-00000036", "ts": 1792950870.836}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950870.837}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950870.837}
+{"client_id": "5c414e0d-dad7-41bd-5727-523d83bff6ef", "error_code": "300", "event": "keep_invalid", "scenario": "session_expire_after", "ticket": "MOCK-00000036", "ts": 1792950870.838}
+{"client_id": "5c414e0d-dad7-41bd-5727-523d83bff6ef", "event": "term", "scenario": "session_expire_after", "ticket": "MOCK-00000036", "ts": 1792950870.838, "was_alive": false}
+{"algo_id": "DEABB8C8-A2BC-48CA-8ED0-8CDF1BD62F61", "client_id": "88af3143-e9f3-41b7-da05-fc3df9771427", "event": "module", "scenario": "session_expire_after", "ts": 1792950870.84}
+{"client_id": "88af3143-e9f3-41b7-da05-fc3df9771427", "event": "ticket_issued", "scenario": "session_expire_after", "ticket": "MOCK-00000037", "ts": 1792950870.84}
+{"client_id": "88af3143-e9f3-41b7-da05-fc3df9771427", "event": "auth_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000037", "ts": 1792950870.841, "user": "fake-user"}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950875.846}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950875.846}
+{"client_id": "88af3143-e9f3-41b7-da05-fc3df9771427", "event": "keep_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000037", "ts": 1792950875.852}
+{"age": 6.01, "event": "session_expired", "scenario": "session_expire_after", "ticket": "MOCK-00000037", "ts": 1792950876.855}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950876.855}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950876.855}
+{"client_id": "88af3143-e9f3-41b7-da05-fc3df9771427", "error_code": "300", "event": "keep_invalid", "scenario": "session_expire_after", "ticket": "MOCK-00000037", "ts": 1792950876.856}
+{"client_id": "88af3143-e9f3-41b7-da05-fc3df9771427", "event": "term", "scenario": "session_expire_after", "ticket": "MOCK-00000037", "ts": 1792950876.856, "was_alive": false}
+{"algo_id": "DEABB8C8-A2BC-48CA-8ED0-8CDF1BD62F61", "client_id": "66cebe8c-d57c-43b8-47c4-8437eacfd949", "event": "module", "scenario": "session_expire_after", "ts": 1792950876.858}
+{"client_id": "66cebe8c-d57c-43b8-47c4-8437eacfd949", "event": "ticket_issued", "scenario": "session_expire_after", "ticket": "MOCK-00000038", "ts": 1792950876.858}
+{"client_id": "66cebe8c-d57c-43b8-47c4-8437eacfd949", "event": "auth_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000038", "ts": 1792950876.859, "user": "fake-user"}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950881.865}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950881.866}
+{"client_id": "66cebe8c-d57c-43b8-47c4-8437eacfd949", "event": "keep_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000038", "ts": 1792950881.866}
+{"age": 6.01, "event": "session_expired", "scenario": "session_expire_after", "ticket": "MOCK-00000038", "ts": 1792950882.872}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950882.872}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950882.872}
+{"client_id": "66cebe8c-d57c-43b8-47c4-8437eacfd949", "error_code": "300", "event": "keep_invalid", "scenario": "session_expire_after", "ticket": "MOCK-00000038", "ts": 1792950882.873}
+{"client_id": "66cebe8c-d57c-43b8-47c4-8437eacfd949", "event": "term", "scenario": "session_expire_after", "ticket": "MOCK-00000038", "ts": 1792950882.873, "was_alive": false}
+{"algo_id": "DEABB8C8-A2BC-48CA-8ED0-8CDF1BD62F61", "client_id": "d3010869-7329-4fb0-917f-59f53f405afc", "event": "module", "scenario": "session_expire_after", "ts": 1792950882.875}
+{"client_id": "d3010869-7329-4fb0-917f-59f53f405afc", "event": "ticket_issued", "scenario": "session_expire_after", "ticket": "MOCK-00000039", "ts": 1792950882.875}
+{"client_id": "d3010869-7329-4fb0-917f-59f53f405afc", "event": "auth_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000039", "ts": 1792950882.876, "user": "fake-user"}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950887.879}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950887.879}
+{"client_id": "d3010869-7329-4fb0-917f-59f53f405afc", "event": "keep_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000039", "ts": 1792950887.88}
+{"age": 6.01, "event": "session_expired", "scenario": "session_expire_after", "ticket": "MOCK-00000039", "ts": 1792950888.886}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950888.886}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950888.886}
+{"client_id": "d3010869-7329-4fb0-917f-59f53f405afc", "error_code": "300", "event": "keep_invalid", "scenario": "session_expire_after", "ticket": "MOCK-00000039", "ts": 1792950888.887}
+{"client_id": "d3010869-7329-4fb0-917f-59f53f405afc", "event": "term", "scenario": "session_expire_after", "ticket": "MOCK-00000039", "ts": 1792950888.888, "was_alive": false}
+{"algo_id": "DEABB8C8-A2BC-48CA-8ED0-8CDF1BD62F61", "client_id": "f7f6b45f-70f1-4b9c-0a51-75a7bb3e0856", "event": "module", "scenario": "session_expire_after", "ts": 1792950888.895}
+{"client_id": "f7f6b45f-70f1-4b9c-0a51-75a7bb3e0856", "event": "ticket_issued", "scenario": "session_expire_after", "ticket": "MOCK-00000040", "ts": 1792950888.895}
+{"client_id": "f7f6b45f-70f1-4b9c-0a51-75a7bb3e0856", "event": "auth_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000040", "ts": 1792950888.897, "user": "fake-user"}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950893.903}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950893.904}
+{"client_id": "f7f6b45f-70f1-4b9c-0a51-75a7bb3e0856", "event": "keep_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000040", "ts": 1792950893.905}
+{"age": 6.01, "event": "session_expired", "scenario": "session_expire_after", "ticket": "MOCK-00000040", "ts": 1792950894.91}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950894.911}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950894.911}
+{"client_id": "f7f6b45f-70f1-4b9c-0a51-75a7bb3e0856", "error_code": "300", "event": "keep_invalid", "scenario": "session_expire_after", "ticket": "MOCK-00000040", "ts": 1792950894.912}
+{"client_id": "f7f6b45f-70f1-4b9c-0a51-75a7bb3e0856", "event": "term", "scenario": "session_expire_after", "ticket": "MOCK-00000040", "ts": 1792950894.913, "was_alive": false}
+{"algo_id": "DEABB8C8-A2BC-48CA-8ED0-8CDF1BD62F61", "client_id": "6c36d3a1-db99-4688-0bf4-5bc29a4ae06d", "event": "module", "scenario": "session_expire_after", "ts": 1792950894.914}
+{"client_id": "6c36d3a1-db99-4688-0bf4-5bc29a4ae06d", "event": "ticket_issued", "scenario": "session_expire_after", "ticket": "MOCK-00000041", "ts": 1792950894.915}
+{"client_id": "6c36d3a1-db99-4688-0bf4-5bc29a4ae06d", "event": "auth_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000041", "ts": 1792950894.916, "user": "fake-user"}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950899.922}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950899.922}
+{"client_id": "6c36d3a1-db99-4688-0bf4-5bc29a4ae06d", "event": "keep_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000041", "ts": 1792950899.923}
+{"age": 6.01, "event": "session_expired", "scenario": "session_expire_after", "ticket": "MOCK-00000041", "ts": 1792950900.929}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950900.929}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950900.93}
+{"client_id": "6c36d3a1-db99-4688-0bf4-5bc29a4ae06d", "error_code": "300", "event": "keep_invalid", "scenario": "session_expire_after", "ticket": "MOCK-00000041", "ts": 1792950900.93}
+{"client_id": "6c36d3a1-db99-4688-0bf4-5bc29a4ae06d", "event": "term", "scenario": "session_expire_after", "ticket": "MOCK-00000041", "ts": 1792950900.931, "was_alive": false}
+{"algo_id": "DEABB8C8-A2BC-48CA-8ED0-8CDF1BD62F61", "client_id": "f37afb19-344b-4bbb-ed5c-57dac132cd54", "event": "module", "scenario": "session_expire_after", "ts": 1792950900.933}
+{"client_id": "f37afb19-344b-4bbb-ed5c-57dac132cd54", "event": "ticket_issued", "scenario": "session_expire_after", "ticket": "MOCK-00000042", "ts": 1792950900.933}
+{"client_id": "f37afb19-344b-4bbb-ed5c-57dac132cd54", "event": "auth_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000042", "ts": 1792950900.934, "user": "fake-user"}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950905.937}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950905.938}
+{"client_id": "f37afb19-344b-4bbb-ed5c-57dac132cd54", "event": "keep_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000042", "ts": 1792950905.938}
+{"age": 6.01, "event": "session_expired", "scenario": "session_expire_after", "ticket": "MOCK-00000042", "ts": 1792950906.942}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950906.942}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950906.943}
+{"client_id": "f37afb19-344b-4bbb-ed5c-57dac132cd54", "error_code": "300", "event": "keep_invalid", "scenario": "session_expire_after", "ticket": "MOCK-00000042", "ts": 1792950906.943}
+{"client_id": "f37afb19-344b-4bbb-ed5c-57dac132cd54", "event": "term", "scenario": "session_expire_after", "ticket": "MOCK-00000042", "ts": 1792950906.944, "was_alive": false}
+{"algo_id": "DEABB8C8-A2BC-48CA-8ED0-8CDF1BD62F61", "client_id": "e5382d83-ea45-4f9a-1c68-968f9cf1ec5e", "event": "module", "scenario": "session_expire_after", "ts": 1792950906.947}
+{"client_id": "e5382d83-ea45-4f9a-1c68-968f9cf1ec5e", "event": "ticket_issued", "scenario": "session_expire_after", "ticket": "MOCK-00000043", "ts": 1792950906.953}
+{"client_id": "e5382d83-ea45-4f9a-1c68-968f9cf1ec5e", "event": "auth_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000043", "ts": 1792950906.955, "user": "fake-user"}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950911.964}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950911.964}
+{"client_id": "e5382d83-ea45-4f9a-1c68-968f9cf1ec5e", "event": "keep_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000043", "ts": 1792950911.965}
+{"age": 6.01, "event": "session_expired", "scenario": "session_expire_after", "ticket": "MOCK-00000043", "ts": 1792950912.967}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950912.967}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950912.968}
+{"client_id": "e5382d83-ea45-4f9a-1c68-968f9cf1ec5e", "error_code": "300", "event": "keep_invalid", "scenario": "session_expire_after", "ticket": "MOCK-00000043", "ts": 1792950912.973}
+{"client_id": "e5382d83-ea45-4f9a-1c68-968f9cf1ec5e", "event": "term", "scenario": "session_expire_after", "ticket": "MOCK-00000043", "ts": 1792950912.974, "was_alive": false}
+{"algo_id": "DEABB8C8-A2BC-48CA-8ED0-8CDF1BD62F61", "client_id": "d0421966-641c-46bf-eb9c-97c7d035f08b", "event": "module", "scenario": "session_expire_after", "ts": 1792950912.975}
+{"client_id": "d0421966-641c-46bf-eb9c-97c7d035f08b", "event": "ticket_issued", "scenario": "session_expire_after", "ticket": "MOCK-00000044", "ts": 1792950912.976}
+{"client_id": "d0421966-641c-46bf-eb9c-97c7d035f08b", "event": "auth_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000044", "ts": 1792950912.976, "user": "fake-user"}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950917.979}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950917.979}
+{"client_id": "d0421966-641c-46bf-eb9c-97c7d035f08b", "event": "keep_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000044", "ts": 1792950917.98}
+{"age": 6.0, "event": "session_expired", "scenario": "session_expire_after", "ticket": "MOCK-00000044", "ts": 1792950918.981}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950918.982}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950918.982}
+{"client_id": "d0421966-641c-46bf-eb9c-97c7d035f08b", "error_code": "300", "event": "keep_invalid", "scenario": "session_expire_after", "ticket": "MOCK-00000044", "ts": 1792950918.982}
+{"client_id": "d0421966-641c-46bf-eb9c-97c7d035f08b", "event": "term", "scenario": "session_expire_after", "ticket": "MOCK-00000044", "ts": 1792950918.983, "was_alive": false}
+{"algo_id": "DEABB8C8-A2BC-48CA-8ED0-8CDF1BD62F61", "client_id": "e375d2e7-32f6-409c-7aaa-6a79680b41a1", "event": "module", "scenario": "session_expire_after", "ts": 1792950918.984}
+{"client_id": "e375d2e7-32f6-409c-7aaa-6a79680b41a1", "event": "ticket_issued", "scenario": "session_expire_after", "ticket": "MOCK-00000045", "ts": 1792950918.985}
+{"client_id": "e375d2e7-32f6-409c-7aaa-6a79680b41a1", "event": "auth_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000045", "ts": 1792950918.986, "user": "fake-user"}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950923.992}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950923.993}
+{"client_id": "e375d2e7-32f6-409c-7aaa-6a79680b41a1", "event": "keep_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000045", "ts": 1792950923.993}
+{"age": 6.01, "event": "session_expired", "scenario": "session_expire_after", "ticket": "MOCK-00000045", "ts": 1792950924.995}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950924.995}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950924.995}
+{"client_id": "e375d2e7-32f6-409c-7aaa-6a79680b41a1", "error_code": "300", "event": "keep_invalid", "scenario": "session_expire_after", "ticket": "MOCK-00000045", "ts": 1792950924.996}
+{"client_id": "e375d2e7-32f6-409c-7aaa-6a79680b41a1", "event": "term", "scenario": "session_expire_after", "ticket": "MOCK-00000045", "ts": 1792950924.997, "was_alive": false}
+{"algo_id": "DEABB8C8-A2BC-48CA-8ED0-8CDF1BD62F61", "client_id": "14b11b29-06f1-479b-c85d-2840a9229940", "event": "module", "scenario": "session_expire_after", "ts": 1792950924.998}
+{"client_id": "14b11b29-06f1-479b-c85d-2840a9229940", "event": "ticket_issued", "scenario": "session_expire_after", "ticket": "MOCK-00000046", "ts": 1792950924.999}
+{"client_id": "14b11b29-06f1-479b-c85d-2840a9229940", "event": "auth_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000046", "ts": 1792950925.0, "user": "fake-user"}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950930.004}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950930.004}
+{"client_id": "14b11b29-06f1-479b-c85d-2840a9229940", "event": "keep_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000046", "ts": 1792950930.005}
+{"age": 6.01, "event": "session_expired", "scenario": "session_expire_after", "ticket": "MOCK-00000046", "ts": 1792950931.006}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950931.006}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950931.006}
+{"client_id": "14b11b29-06f1-479b-c85d-2840a9229940", "error_code": "300", "event": "keep_invalid", "scenario": "session_expire_after", "ticket": "MOCK-00000046", "ts": 1792950931.007}
+{"client_id": "14b11b29-06f1-479b-c85d-2840a9229940", "event": "term", "scenario": "session_expire_after", "ticket": "MOCK-00000046", "ts": 1792950931.008, "was_alive": false}
+{"algo_id": "DEABB8C8-A2BC-48CA-8ED0-8CDF1BD62F61", "client_id": "9a42f594-45d1-4b9c-16bc-aefb25d0c58e", "event": "module", "scenario": "session_expire_after", "ts": 1792950931.014}
+{"client_id": "9a42f594-45d1-4b9c-16bc-aefb25d0c58e", "event": "ticket_issued", "scenario": "session_expire_after", "ticket": "MOCK-00000047", "ts": 1792950931.015}
+{"client_id": "9a42f594-45d1-4b9c-16bc-aefb25d0c58e", "event": "auth_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000047", "ts": 1792950931.016, "user": "fake-user"}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950936.022}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950936.022}
+{"client_id": "9a42f594-45d1-4b9c-16bc-aefb25d0c58e", "event": "keep_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000047", "ts": 1792950936.023}
+{"age": 6.02, "event": "session_expired", "scenario": "session_expire_after", "ticket": "MOCK-00000047", "ts": 1792950937.032}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950937.032}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950937.032}
+{"client_id": "9a42f594-45d1-4b9c-16bc-aefb25d0c58e", "error_code": "300", "event": "keep_invalid", "scenario": "session_expire_after", "ticket": "MOCK-00000047", "ts": 1792950937.033}
+{"client_id": "9a42f594-45d1-4b9c-16bc-aefb25d0c58e", "event": "term", "scenario": "session_expire_after", "ticket": "MOCK-00000047", "ts": 1792950937.033, "was_alive": false}
+{"algo_id": "DEABB8C8-A2BC-48CA-8ED0-8CDF1BD62F61", "client_id": "11a38d66-f54c-4390-f32a-0eb783ec111e", "event": "module", "scenario": "session_expire_after", "ts": 1792950937.035}
+{"client_id": "11a38d66-f54c-4390-f32a-0eb783ec111e", "event": "ticket_issued", "scenario": "session_expire_after", "ticket": "MOCK-00000048", "ts": 1792950937.035}
+{"client_id": "11a38d66-f54c-4390-f32a-0eb783ec111e", "event": "auth_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000048", "ts": 1792950937.036, "user": "fake-user"}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950942.042}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950942.042}
+{"client_id": "11a38d66-f54c-4390-f32a-0eb783ec111e", "event": "keep_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000048", "ts": 1792950942.042}
+{"age": 6.01, "event": "session_expired", "scenario": "session_expire_after", "ticket": "MOCK-00000048", "ts": 1792950943.046}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950943.046}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950943.046}
+{"client_id": "11a38d66-f54c-4390-f32a-0eb783ec111e", "error_code": "300", "event": "keep_invalid", "scenario": "session_expire_after", "ticket": "MOCK-00000048", "ts": 1792950943.047}
+{"client_id": "11a38d66-f54c-4390-f32a-0eb783ec111e", "event": "term", "scenario": "session_expire_after", "ticket": "MOCK-00000048", "ts": 1792950943.047, "was_alive": false}
+{"algo_id": "DEABB8C8-A2BC-48CA-8ED0-8CDF1BD62F61", "client_id": "ee69ede5-cda3-4997-6699-90a07dffec36", "event": "module", "scenario": "session_expire_after", "ts": 1792950943.049}
+{"client_id": "ee69ede5-cda3-4997-6699-90a07dffec36", "event": "ticket_issued", "scenario": "session_expire_after", "ticket": "MOCK-00000049", "ts": 1792950943.05}
+{"client_id": "ee69ede5-cda3-4997-6699-90a07dffec36", "event": "auth_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000049", "ts": 1792950943.051, "user": "fake-user"}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950948.057}
+{"client_id": "", "event": "probe_204", "scenario": "session_expire_after", "ts": 1792950948.057}
+{"client_id": "ee69ede5-cda3-4997-6699-90a07dffec36", "event": "keep_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000049", "ts": 1792950948.058}
+{"age": 6.01, "event": "session_expired", "scenario": "session_expire_after", "ticket": "MOCK-00000049", "ts": 1792950949.061}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950949.061}
+{"client_id": "", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792950949.061}
+{"client_id": "ee69ede5-cda3-4997-6699-90a07dffec36", "error_code": "300", "event": "keep_invalid", "scenario": "session_expire_after", "ticket": "MOCK-00000049", "ts": 1792950949.062}
+{"client_id": "ee69ede5-cda3-4997-6699-90a07dffec36", "event": "term", "scenario": "session_expire_after", "ticket": "MOCK-00000049", "ts": 1792950949.063, "was_alive": false}
+{"algo_id": "DEABB8C8-A2BC-48CA-8ED0-8CDF1BD62F61", "client_id": "95f696e8-13c1-4a92-e4a5-e1aadb93e35b", "event": "module", "scenario": "session_expire_after", "ts": 1792950949.064}
+{"client_id": "95f696e8-13c1-4a92-e4a5-e1aadb93e35b", "event": "ticket_issued", "scenario": "session_expire_after", "ticket": "MOCK-00000050", "ts": 1792950949.065}
+{"client_id": "95f696e8-13c1-4a92-e4a5-e1aadb93e35b", "event": "auth_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000050", "ts": 1792950949.066, "user": "fake-user"}

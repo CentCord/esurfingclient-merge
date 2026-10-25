@@ -106,6 +106,9 @@ class Model:
 class Handler(BaseHTTPRequestHandler):
     protocol_version = "HTTP/1.1"
 
+    def public_base(self):
+        return getattr(self.model.args, "public_base", None) or f"http://{self.headers.get('Host', '127.0.0.1')}"
+
     @property
     def model(self):
         return self.server.model
@@ -159,7 +162,7 @@ class Handler(BaseHTTPRequestHandler):
             self.traffic(path, parsed.query)
             return
         if path == "/portal":
-            base = f"http://{self.headers.get('Host', '127.0.0.1')}"
+            base = self.public_base()
             ticket = base + "/ticket.cgi?wlanuserip=192.0.2.10&wlanacip=192.0.2.1"
             data = ("<!--//config.campus.js.chinatelecom.com"
                     f"<ticket-url><![CDATA[{ticket}]]></ticket-url>"
@@ -172,7 +175,7 @@ class Handler(BaseHTTPRequestHandler):
                 self.model.event("probe_204", client_id=client_id)
                 self.reply(204)
             else:
-                base = f"http://{self.headers.get('Host', '127.0.0.1')}"
+                base = self.public_base()
                 location = base + "/portal?wlanuserip=192.0.2.10&wlanacip=192.0.2.1"
                 self.model.event("probe_302", client_id=client_id)
                 self.reply(302, headers={"Location": location})
@@ -255,7 +258,7 @@ class Handler(BaseHTTPRequestHandler):
         with self.model.lock:
             self.model.sessions[ticket] = {"client_id": client_id, "peer_ip": self.client_address[0], "user": user,
                                            "authed_at": time.monotonic(), "valid": True}
-        base = f"http://{self.headers.get('Host', '127.0.0.1')}"
+        base = self.public_base()
         xml = ("<response>"
                f"<keep-url><![CDATA[{base}/keep.cgi]]></keep-url>"
                f"<term-url><![CDATA[{base}/term.cgi]]></term-url>"
@@ -340,6 +343,7 @@ def main(argv=None):
     p.add_argument("--scenario", choices=SCENARIOS, default="normal")
     p.add_argument("--host", default="127.0.0.1")
     p.add_argument("--port", type=int, default=7001)
+    p.add_argument("--public-base", help="absolute base URL returned in portal/auth replies")
     p.add_argument("--udp-port", type=int, default=0, help="optional UDP echo/loss listener")
     p.add_argument("--esurface-root", default="/Users/orpheus/Desktop/天翼校园网/esurface")
     p.add_argument("--after", type=float, default=2, help="expire/flap/kick period in seconds")
