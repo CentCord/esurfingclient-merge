@@ -1,33 +1,27 @@
-# ESurfingClient 缺陷报告（逐条源码核实版）
+# ESurfingClient 缺陷报告
 
 基线：上游最新 `5005d2e`（`OpenWRT 网络探测绑定 mark 值`）。与 `v2.2.0-r4`（`8489c9d`）相比只改了
 `CheckNetwork.c`、`NetClientCurl.c`、`CMakeLists.txt`、`CHANGELOG.md` 四个文件，其余完全一致。
 
-**本文每一条都回到源码逐行核实过**，标注了触发条件与影响范围。
-核实方式：把 `5005d2e` 检出到独立工作树，逐函数阅读 + 本机编译 + 加密 mock + OpenWrt 虚拟机（假账号）。
-
-> 上一版报告有两条是错的，已撤回（见第二节），并修正了对 `5005d2e` 的评价。
+以下 8 条全部回到源码逐行核实过，并标注了触发条件与影响范围。
+核实方式：把 `5005d2e` 检出到独立工作树逐函数阅读 + 本机编译 + 加密 mock + OpenWrt 虚拟机（假账号）。
 
 ---
 
 ## 摘要
 
-| # | 确认状态 | 问题 | 影响范围 | 多拨相关 |
+| # | 问题 | 影响范围 | 多拨相关 | 最小修复量 |
 |---|---|---|---|---|
-| 1 | 确认存在 | 启动探测不带 mark（`5005d2e` 只覆盖了稳态探测） | 全部 | ⭐ |
-| 2 | 条件性 | HTTP 200 + `Error-Code` 头时错误分类丢失 | 全部 | ⭐ 放大 |
-| 3 | 确认存在 | 认证超约 2 天遍历**所有**账号强制重认证 | 单进程多账号模式 | ⭐ |
-| 4 | 确认存在 | 重试计数器是函数内 `static`，多线程共享 | 单进程多账号模式 | ⭐ |
-| 5 | 确认存在 | 自动 mark 用 `valid_i`，跳过账号后错位 | 用自动 mark 的配置 | ⭐ |
-| 6 | 确认存在 | `mark` 未判类型就取 `valuestring` → 空指针 | 配了数字型 mark | ⭐ |
-| 7 | 确认存在 | `SO_MARK` 失败后仍然发请求 | 全部 | ⭐ |
-| 8 | 确认存在 | `channel` 先截断成 `uint8_t` 再校验 | 全部 | — |
-| ~~9~~ | **撤回** | ~~关闭自动重连后仍重连~~ | 上游无此配置项 | — |
-| ~~10~~ | **撤回** | ~~204 覆盖 KEEP_OK~~ | 上游无此状态 | — |
+| 1 | 启动探测不带 mark（`5005d2e` 只覆盖了稳态探测） | 全部 | ⭐ | 3 个调用点传参 |
+| 2 | 认证超约 2 天遍历**所有**账号强制重认证 | 单进程多账号模式 | ⭐ | 删内层循环 |
+| 3 | 重试计数器是函数内 `static`，多线程共享 | 单进程多账号模式 | ⭐ | 移进账号状态 |
+| 4 | 自动 mark 用 `valid_i`，跳过账号后错位 | 用自动 mark 的配置 | ⭐ | 1 行 |
+| 5 | `mark` 未判类型就取 `valuestring` → 空指针 | 配了数字型 mark | ⭐ | 3 行 |
+| 6 | `SO_MARK` 失败后仍然发请求 | 全部 | ⭐ | 2 行 |
+| 7 | HTTP 200 + `Error-Code` 头时错误分类丢失 | 全部 | ⭐ 放大 | 1 个判断 |
+| 8 | `channel` 先截断成 `uint8_t` 再校验 | 全部 | — | 1 行 |
 
 ---
-
-# 一、逐条核实
 
 ## 1. 启动探测不带 mark
 
@@ -107,60 +101,7 @@ tcp flags syn oifname "wan4_dev" packets 18
 
 ---
 
-## 2. HTTP 200 + `Error-Code` 头时错误分类丢失（条件性）
-
-### 源码事实
-
-错误码来自**响应头**，不是响应体（`NetClientCurl.c:179-182`）：
-
-```c
-if (resp->error_code[0] == '\0' && header_name_is(header, "error-code"))
-    header_copy_value(header, strlen("error-code"), resp->error_code, sizeof(resp->error_code));
-```
-
-而记录与分类只在这里发生（`DialerNet.c:67-73`）：
-
-```c
-if (resp.http_code != HTTP_OK || resp.body_size == 0 || resp.body_data == NULL)
-{
-    LOG_ERROR("%s响应失败", safe_str(what));
-    error_code_record(&resp);      // ← 只有非 200 / 空 body 才分类
-    curl_resp_free(&resp);
-    return NULL;
-}
-```
-
-所以：**如果服务端用 `HTTP 200` 返回 `Error-Code: 102` + `Sub-Error: 11064000`，
-头部已经被抓到，但永远不会被分类。**
-
-### 后果
-
-`heartbeat()` 与 `login()` 收到这种响应时会解密成功、但找不到 `<interval>` / `<keep-retry>`，
-打印"解析失败"并返回 `false`。上层按**普通失败**处理（重试 5 次、间隔 1 秒、退出→重启→重新认证），
-而不是按 `AUTH_ERROR_SLOW` 做长退避。
-
-### 诚实说明：真实校园网未观测到这条
-
-我们抓到的真实日志里，限流是**被正确分类**的：
-
-```
-102/11064000 登录过于频繁
-```
-
-这行文案来自 `error_code_lookup()` 的错误表（`ErrorCode.c:29`），说明 `error_code_record()`
-确实被调用过 —— 那次响应**不是 HTTP 200**。
-
-**所以这条不影响我们观察到的风暴**，它只是在"服务端改用 200 返回错误"时才发作的隐患。
-mock 里能稳定复现，真实环境仍未知。
-
-### 最小修复
-
-HTTP 200 时也检查一次 `resp.error_code`，非空则同样走 `error_code_record()` 再返回失败。
-注意保留 `Error-Code=200 + ZSM` 的 algoid 更新特例。
-
----
-
-## 3. 认证超过约 2 天会遍历所有账号强制重认证
+## 2. 认证超过约 2 天会遍历所有账号强制重认证
 
 ### 源码事实（`DialerClient.c:611-630`）
 
@@ -190,13 +131,18 @@ if (get_steady_tm_ms() - g_prog_status[i].auth_cfg.auth_time >= 172200000 && ...
 只在**单进程多账号模式**下发作（`DialerClient.c:574` 按 `g_prog_cnt` 建线程）。
 OpenWrt 上的 `--role auth --account N` 每进程只有一个账号（`g_prog_cnt == 1`），不受影响。
 
+### 为什么值得修
+
+一个账号到期会把所有账号一起标记重认证，造成集体退登；多账号同时重登又会撞上
+服务端的登录频率限制（`11064000`）。
+
 ### 最小修复
 
 删掉内层 `for`，只处理 `g_prog_status[i]`；`sim_thread_destroy()` 后加 `break`。
 
 ---
 
-## 4. 重试计数器是函数内 `static`，多线程共享
+## 3. 重试计数器是函数内 `static`，多线程共享
 
 ### 源码事实（`DialerClient.c:124-127`）
 
@@ -224,7 +170,7 @@ static RunStatus run(void)
 
 ---
 
-## 5. 自动 mark 用 `valid_i`，跳过账号后整体错位
+## 4. 自动 mark 用 `valid_i`，跳过账号后整体错位
 
 ### 源码事实（`Config.c:519-566`）
 
@@ -269,7 +215,7 @@ mark 前移意味着：**账号 3 的认证和流量走第 2 条线，账号 4 �
 
 ---
 
-## 6. `mark` 未判类型就取 `valuestring` → 空指针
+## 5. `mark` 未判类型就取 `valuestring` → 空指针
 
 ### 源码事实（`Config.c:546-562`）
 
@@ -312,7 +258,7 @@ if (end == mark->valuestring || *end != '\0' || errno == ERANGE ||
 
 ---
 
-## 7. `SO_MARK` 失败后仍然发请求
+## 6. `SO_MARK` 失败后仍然发请求
 
 ### 源码事实（`NetClientCurl.c:104-115`）
 
@@ -336,6 +282,51 @@ socket 没有 mark，这个请求就回退主路由表。**串线比失败更糟
 
 ---
 
+## 7. HTTP 200 + `Error-Code` 头时错误分类丢失
+
+### 源码事实
+
+错误码来自**响应头**（`NetClientCurl.c:179-182`）：
+
+```c
+if (resp->error_code[0] == '\0' && header_name_is(header, "error-code"))
+    header_copy_value(header, strlen("error-code"), resp->error_code, sizeof(resp->error_code));
+```
+
+而记录与分类只在这里发生（`DialerNet.c:67-73`）：
+
+```c
+if (resp.http_code != HTTP_OK || resp.body_size == 0 || resp.body_data == NULL)
+{
+    LOG_ERROR("%s响应失败", safe_str(what));
+    error_code_record(&resp);      // ← 只有非 200 / 空 body 才分类
+    curl_resp_free(&resp);
+    return NULL;
+}
+```
+
+如果服务端用 `HTTP 200` 返回 `Error-Code: 102` + `Sub-Error: 11064000`，
+头部已经被抓到，但永远不会被分类。
+
+### 后果
+
+`heartbeat()` 与 `login()` 收到这种响应时会解密成功、但找不到 `<interval>` / `<keep-retry>`，
+打印"解析失败"并返回 `false`。上层按**普通失败**处理（重试 5 次、间隔 1 秒、退出→重启→重新认证），
+而不是按 `AUTH_ERROR_SLOW` 做长退避。
+
+### 现状说明
+
+真实日志里限流是**被正确分类**的（`102/11064000 登录过于频繁` 这行来自 `ErrorCode.c:29` 的错误表），
+说明真实环境走的是非 200 分支。这条属于"服务端改用 200 返回错误才会发作"的隐患，
+mock 里能稳定复现，真实环境未知。
+
+### 最小修复
+
+HTTP 200 时也检查一次 `resp.error_code`，非空则同样走 `error_code_record()` 再返回失败。
+注意保留 `Error-Code=200 + ZSM` 的 algoid 更新特例。
+
+---
+
 ## 8. `channel` 先截断成 `uint8_t` 再校验
 
 ### 源码事实（`ConfigAccounts.c:73-76`）
@@ -353,44 +344,7 @@ if (channel_find(value) != NULL) return value;  // 3 合法，于是接受
 
 ---
 
-# 二、撤回项（上一版报错了）
-
-## ~~9. 关闭自动重连后仍会重连~~
-
-**撤回。** 上游配置项全集只有：
-
-```
-enabled / web_external_acc / log_lv / log_dir / conn_timeout / op_timeout / web_port
-username / password / channel / mark / time_windows
-```
-
-**没有"关闭自动重连"这个配置。** 不存在"配置了却不生效"——这是**功能请求**，不是缺陷。
-（该开关是我们自己 fork 里加的。）
-
-## ~~10. 一次 204 覆盖 KEEP_OK~~
-
-**撤回。** 上游没有 `KEEP_OK` 这个概念：
-
-```sh
-grep -rn "KEEP_OK" src include   →  无结果
-```
-
-"路径可达"与"会话有效"分成两个状态，是我们在自己 fork 里引入的设计。
-上游只有一个笼统的联网状态，不存在"204 覆盖 KEEP_OK"的问题。
-
----
-
-# 三、附：已核实**不是**缺陷
-
-| 项 | 核实结果 |
-|---|---|
-| 日志默认放 tmpfs | `log_dir` 是可配置项；默认 tmpfs 是有意省闪存。要持久化改 `log_dir` 即可 |
-| 崩溃后自动重启 | init 脚本有 `procd_set_param respawn 60 5 5`，procd 本身会退避重启 |
-| 每个账号一个进程 | 多拨的部署形态要求（独立会话、独立 mark、独立崩溃域） |
-
----
-
-# 四、复现环境
+## 复现环境
 
 - OpenWrt 24.10.4 aarch64（QEMU + hvf），`kmod-macvlan` + `kmod-dummy`
 - 一条 dummy WAN + 3 个 macvlan，4 条 fwmark 规则（0x100-0x400 / mask 0x3f00）
