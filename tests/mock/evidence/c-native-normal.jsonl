@@ -1,0 +1,30 @@
+{"client_id": "", "event": "probe_302", "scenario": "normal", "ts": 1792949847.151}
+{"client_id": "", "event": "probe_302", "scenario": "normal", "ts": 1792949847.151}
+{"client_id": "710ac5cf-c047-498c-50f7-69c4135cdc23", "event": "probe_302", "scenario": "normal", "ts": 1792949847.152}
+{"client_id": "", "event": "probe_302", "scenario": "normal", "ts": 1792949847.152}
+{"client_id": "", "event": "probe_302", "scenario": "normal", "ts": 1792949847.152}
+{"client_id": "", "event": "probe_302", "scenario": "normal", "ts": 1792949847.153}
+{"client_id": "", "event": "probe_302", "scenario": "normal", "ts": 1792949847.153}
+{"algo_id": "DEABB8C8-A2BC-48CA-8ED0-8CDF1BD62F61", "client_id": "710ac5cf-c047-498c-50f7-69c4135cdc23", "event": "module", "scenario": "normal", "ts": 1792949847.154}
+{"client_id": "710ac5cf-c047-498c-50f7-69c4135cdc23", "event": "ticket_issued", "scenario": "normal", "ticket": "MOCK-00000001", "ts": 1792949847.156}
+{"client_id": "710ac5cf-c047-498c-50f7-69c4135cdc23", "event": "auth_ok", "scenario": "normal", "ticket": "MOCK-00000001", "ts": 1792949847.162, "user": "fake-user"}
+{"client_id": "", "event": "probe_204", "scenario": "normal", "ts": 1792949852.168}
+{"client_id": "", "event": "probe_204", "scenario": "normal", "ts": 1792949852.168}
+{"client_id": "710ac5cf-c047-498c-50f7-69c4135cdc23", "event": "keep_ok", "scenario": "normal", "ticket": "MOCK-00000001", "ts": 1792949852.169}
+{"client_id": "", "event": "probe_204", "scenario": "normal", "ts": 1792949853.171}
+{"client_id": "", "event": "probe_204", "scenario": "normal", "ts": 1792949853.172}
+{"client_id": "710ac5cf-c047-498c-50f7-69c4135cdc23", "event": "keep_ok", "scenario": "normal", "ticket": "MOCK-00000001", "ts": 1792949853.172}
+{"client_id": "", "event": "probe_204", "scenario": "normal", "ts": 1792949854.178}
+{"client_id": "", "event": "probe_204", "scenario": "normal", "ts": 1792949854.178}
+{"client_id": "710ac5cf-c047-498c-50f7-69c4135cdc23", "event": "keep_ok", "scenario": "normal", "ticket": "MOCK-00000001", "ts": 1792949854.179}
+{"client_id": "", "event": "probe_204", "scenario": "normal", "ts": 1792949855.181}
+{"client_id": "", "event": "probe_204", "scenario": "normal", "ts": 1792949855.181}
+{"client_id": "710ac5cf-c047-498c-50f7-69c4135cdc23", "event": "keep_ok", "scenario": "normal", "ticket": "MOCK-00000001", "ts": 1792949855.182}
+{"client_id": "", "event": "probe_204", "scenario": "normal", "ts": 1792949856.188}
+{"client_id": "", "event": "probe_204", "scenario": "normal", "ts": 1792949856.188}
+{"client_id": "710ac5cf-c047-498c-50f7-69c4135cdc23", "event": "keep_ok", "scenario": "normal", "ticket": "MOCK-00000001", "ts": 1792949856.189}
+{"client_id": "", "event": "probe_204", "scenario": "normal", "ts": 1792949857.19}
+{"client_id": "", "event": "probe_204", "scenario": "normal", "ts": 1792949857.19}
+{"client_id": "710ac5cf-c047-498c-50f7-69c4135cdc23", "event": "keep_ok", "scenario": "normal", "ticket": "MOCK-00000001", "ts": 1792949857.191}
+{"client_id": "710ac5cf-c047-498c-50f7-69c4135cdc23", "event": "term", "scenario": "normal", "ticket": "MOCK-00000001", "ts": 1792949857.929, "was_alive": true}
+{"event": "c_native_assertion_passed", "exit_code": 0, "scenario": "normal", "ts": 1792949858.177}

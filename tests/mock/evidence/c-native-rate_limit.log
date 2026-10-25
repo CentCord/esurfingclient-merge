@@ -1,0 +1,6 @@
+[2026-10-26 01:37:50] [auth#1 pid=88354] [main] [INFO] [LineControl.c:72] 线路状态账号=1 mark=0x0 iface=- UNKNOWN -> PORTAL_REDIRECT 原因=网络探测收到门户重定向
+[2026-10-26 01:37:50] [auth#1 pid=88354] [main] [INFO] [CheckNetwork.c:406] 需要认证
+[2026-10-26 01:37:50] [auth#1 pid=88354] [main] [INFO] [DialerServer.c:157] 选择认证服务器: 127.0.0.1:54816 (连接耗时 0 ms)
+[2026-10-26 01:37:50] [auth#1 pid=88354] [main] [ERROR] [DialerNet.c:70] 登录响应失败
+[2026-10-26 01:37:50] [auth#1 pid=88354] [main] [ERROR] [DialerAuth.c:177] 登录失败
+[2026-10-26 01:37:50] [auth#1 pid=88354] [main] [INFO] [LineControl.c:72] 线路状态账号=1 mark=0x0 iface=- PORTAL_REDIRECT -> RATE_LIMITED 原因=登录过于频繁, 请过一段时间再试
