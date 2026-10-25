@@ -425,6 +425,9 @@ int dialer_app(void* arg)
          */
         watchdog_pet_network();
 
+        /* 配置里的 log_lv 变了就热切换；放在每账号循环里，OpenWrt 上才真正跑到 */
+        log_level_watch();
+
         if (supervisor_gone())
         {
             LOG_WARN("守护进程已退出, 本进程一并退出");
@@ -719,9 +722,6 @@ void work(void)
     uint64_t check_time = 0;
     while (g_thread_keep_alive && g_stop_requested == 0)
     {
-        /* 配置里的 log_lv 变了就热切换，不需要重启服务 */
-        log_level_watch();
-
         if (check_time > 299999)
         {
             check_time = 0;
