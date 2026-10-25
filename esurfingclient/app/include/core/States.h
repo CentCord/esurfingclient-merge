@@ -91,6 +91,8 @@ typedef struct
     uint32_t line_restore_delay_sec;
     uint32_t line_restore_max_backoff_sec;
     uint32_t isolation_rate_limit_sec;
+    /** 只有开启时才每秒读配置文件检查 log_lv 变化 */
+    bool log_hot_reload;
 } runtime_config_t;
 
 typedef enum

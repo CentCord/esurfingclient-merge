@@ -129,6 +129,9 @@ void log_level_watch(void)
     static time_t last_mtime = 0;
     static long last_size = -1;
 
+    /* 未开启热切换时直接返回：不做 stat，也不读配置 */
+    if (g_runtime_cfg.log_hot_reload == false) return;
+
     const char* path = get_config_path();
     if (path == NULL || path[0] == '\0') return;
 

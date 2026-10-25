@@ -39,7 +39,7 @@ static const cfg_def_t s_cfg_defaults[] = {
     {"op_timeout",       CFG_DEF_NUM, false, DEFAULT_OP_TIMEOUT, NULL, "秒"},
     {"web_port",         CFG_DEF_NUM, false, DEFAULT_WEB_PORT, NULL, NULL},
     {"runtime",          CFG_DEF_OBJ, false, 0,
-     "{\"reconnect\":{\"enabled\":true,\"max_attempts\":0,\"line_error_max_attempts\":5,\"line_error_interval_sec\":10,\"backoff\":\"sequence\",\"intervals_sec\":[60,180,300,600,1200,1800],\"fixed_interval_sec\":300,\"base_sec\":60,\"multiplier\":2.0,\"max_sec\":1800,\"jitter_sec\":15},\"auth\":{\"connect_timeout_sec\":10,\"request_timeout_sec\":15,\"stagger_sec\":20,\"session_invalid_wait_sec\":0},\"keepalive\":{\"interval_mode\":\"server\",\"interval_sec\":300,\"min_interval_sec\":30,\"max_interval_sec\":1800,\"failure_retries\":5,\"retry_interval_sec\":3,\"retry_jitter_sec\":1},\"probe\":{\"interval_sec\":2,\"connect_timeout_ms\":3000,\"request_timeout_ms\":4000,\"line_error_tolerance\":3,\"portal_confirmations\":2},\"line_control\":{\"enabled\":true,\"down_on_session_invalid\":true,\"down_on_auth_failed\":false,\"restore_delay_sec\":30,\"restore_max_backoff_sec\":600},\"isolation\":{\"rate_limit_sec\":1800}}", NULL},
+     "{\"reconnect\":{\"enabled\":true,\"max_attempts\":0,\"line_error_max_attempts\":5,\"line_error_interval_sec\":10,\"backoff\":\"sequence\",\"intervals_sec\":[60,180,300,600,1200,1800],\"fixed_interval_sec\":300,\"base_sec\":60,\"multiplier\":2.0,\"max_sec\":1800,\"jitter_sec\":15},\"auth\":{\"connect_timeout_sec\":10,\"request_timeout_sec\":15,\"stagger_sec\":20,\"session_invalid_wait_sec\":0},\"keepalive\":{\"interval_mode\":\"server\",\"interval_sec\":300,\"min_interval_sec\":30,\"max_interval_sec\":1800,\"failure_retries\":5,\"retry_interval_sec\":3,\"retry_jitter_sec\":1},\"probe\":{\"interval_sec\":2,\"connect_timeout_ms\":3000,\"request_timeout_ms\":4000,\"line_error_tolerance\":3,\"portal_confirmations\":2},\"line_control\":{\"enabled\":true,\"down_on_session_invalid\":true,\"down_on_auth_failed\":false,\"restore_delay_sec\":30,\"restore_max_backoff_sec\":600},\"isolation\":{\"rate_limit_sec\":1800},\"log\":{\"hot_reload\":false}}", NULL},
 };
 
 static uint8_t complete_object_from_template(cJSON* object, const cJSON* defaults, const char* prefix)
@@ -113,6 +113,7 @@ void runtime_config_defaults(runtime_config_t* cfg)
     cfg->line_down_on_session_invalid = true;
     cfg->line_restore_delay_sec = 30;
     cfg->line_restore_max_backoff_sec = 600;
+    cfg->log_hot_reload = false;
     cfg->isolation_rate_limit_sec = 1800;
 }
 
@@ -265,6 +266,20 @@ void runtime_config_load(const cJSON* cfg_json, runtime_config_t* out)
         isolation = NULL;
     }
     out->isolation_rate_limit_sec = runtime_uint(isolation, "rate_limit_sec", 1800, 1, 86400);
+
+    /* runtime.log：热切换日志等级默认关闭；开启后进程每秒 stat 一次配置文件 */
+    const cJSON* log_group = cJSON_GetObjectItem(root, "log");
+    if (log_group != NULL && !cJSON_IsObject(log_group))
+    {
+        LOG_WARN("runtime.log 必须是对象，回退该组默认值");
+        log_group = NULL;
+    }
+    if (log_group != NULL)
+    {
+        const cJSON* hot = cJSON_GetObjectItem(log_group, "hot_reload");
+        if (cJSON_IsBool(hot)) out->log_hot_reload = cJSON_IsTrue(hot);
+        else if (hot != NULL) LOG_WARN("runtime.log.hot_reload 类型非法，回退 false");
+    }
 }
 
 /**
@@ -416,3 +431,4 @@ uint8_t complete_cfg(cJSON* cfg_json)
 
     return added;
 }
+

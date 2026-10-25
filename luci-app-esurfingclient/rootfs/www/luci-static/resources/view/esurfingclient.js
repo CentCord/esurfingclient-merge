@@ -405,7 +405,8 @@ return view.extend({
                 enabled: true, down_on_session_invalid: true, down_on_auth_failed: false,
                 restore_delay_sec: 30, restore_max_backoff_sec: 600
             },
-            isolation: { rate_limit_sec: 1800 }
+            isolation: { rate_limit_sec: 1800 },
+            log: { hot_reload: false }
         };
     },
 
@@ -548,7 +549,11 @@ return view.extend({
             self.rtNum('恢复退避上限', 'runtime.line_control.restore_max_backoff_sec', '秒'),
 
             E('h4', {}, '隔离'),
-            self.rtNum('限流隔离时长', 'runtime.isolation.rate_limit_sec', '秒；被 11064000 限流后暂停该账号多久')
+            self.rtNum('限流隔离时长', 'runtime.isolation.rate_limit_sec', '秒；被 11064000 限流后暂停该账号多久'),
+
+            E('h4', {}, '日志'),
+            self.rtBool('启用日志等级热切换', 'runtime.log.hot_reload',
+                '开启后每个进程每秒检查一次配置文件，改了日志等级立即生效、不用重启；关闭则完全不读配置')
         ]);
     },
 
