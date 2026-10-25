@@ -163,7 +163,10 @@ typedef struct
     uint8_t chn;
     char user_agent[USER_AGENT_LEN];
     uint32_t mark;
+    /** 设备名，如 wan2_dev；用于 ip link 兜底 */
     char iface[IF_LEN];
+    /** mwan3 接口名，如 wan2；为空表示不对 mwan3 做操作 */
+    char mwan3_iface[IF_LEN];
     bool use_cus_mark;
     time_window_t time_windows[MAX_TIME_WINDOWS];
     uint8_t time_window_count;

@@ -285,6 +285,7 @@ static account_state_t fill_account(const cJSON* account, const uint8_t cfg_no, 
     const cJSON* pwd = cJSON_GetObjectItem(account, "password");
     const cJSON* chn = cJSON_GetObjectItem(account, "channel");
     const cJSON* iface = cJSON_GetObjectItem(account, "iface");
+    const cJSON* mwan3_iface = cJSON_GetObjectItem(account, "mwan3_iface");
 
     // 先把用户写过的东西按原样填进去: 配置不可用时网页要靠这块内存回显
     cfg->idx = cfg_no;
@@ -310,6 +311,29 @@ static account_state_t fill_account(const cJSON* account, const uint8_t cfg_no, 
         else if (!cJSON_IsString(iface) || (iface->valuestring != NULL && iface->valuestring[0] != '\0'))
             LOG_WARN("配置 %" PRIu8 " iface 非法或设备名过长，将不执行线路控制", cfg_no);
     }
+    /**
+     * mwan3 接口名（如 wan2）与设备名（如 wan2_dev）是两个不同的命名空间：
+     * mwan3 ifdown 认前者，ip link 认后者。这里单独解析，留空表示不操作 mwan3。
+     */
+    cfg->mwan3_iface[0] = '\0';
+    if (mwan3_iface != NULL)
+    {
+        bool ok = cJSON_IsString(mwan3_iface) && mwan3_iface->valuestring != NULL &&
+                  strlen(mwan3_iface->valuestring) < sizeof(cfg->mwan3_iface);
+        if (ok)
+        {
+            for (const unsigned char* p = (const unsigned char*)mwan3_iface->valuestring; *p != '\0'; p++)
+            {
+                if (!( (*p >= 'a' && *p <= 'z') || (*p >= '0' && *p <= '9') ||
+                       *p == '_' || *p == '.' || *p == '-')) { ok = false; break; }
+            }
+        }
+        if (ok && mwan3_iface->valuestring[0] != '\0')
+            snprintf(cfg->mwan3_iface, sizeof(cfg->mwan3_iface), "%s", mwan3_iface->valuestring);
+        else
+            LOG_WARN("配置 %" PRIu8 " mwan3_iface 非法，将不操作 mwan3", cfg_no);
+    }
+
     LOG_DEBUG("配置 %" PRIu8 " 使用 UA: %s", cfg_no, cfg->user_agent);
 
     if (usr == NULL || cJSON_IsString(usr) == false || usr->valuestring[0] == '\0')

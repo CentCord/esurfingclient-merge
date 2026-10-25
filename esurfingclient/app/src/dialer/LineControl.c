@@ -73,6 +73,51 @@ void line_control_set_state(const line_state_t state, const char* reason)
     persist_state();
 }
 
+/**
+ * @brief 调 mwan3 把某条线从分流里装载/卸载
+ *
+ * mwan3 的接口名（wan2）和设备名（wan2_dev）不是一回事：
+ *   mwan3 ifdown wan2   —— 卸载该接口的 iptables 标记/ip rule/路由表，不动网卡和 IP
+ *   ip link set dev wan2_dev down —— 只把网卡置 down，mwan3 要靠探测才发现（15-70 秒）
+ *
+ * 优先用前者：瞬时生效、恢复只要 ifup、IP 和 DHCP 都还在。
+ *
+ * @param action "ifup" 或 "ifdown"
+ * @return 是否执行成功
+ */
+static bool run_mwan3(const char* action)
+{
+#ifdef __OPENWRT__
+    const char* name = g_prog_status[tl_thread_idx].login_cfg.mwan3_iface;
+    if (name == NULL || name[0] == '\0') return false;
+
+    const size_t len = strlen(name);
+    if (len == 0 || len >= IF_LEN) return false;
+    for (size_t i = 0; i < len; i++)
+    {
+        const char c = name[i];
+        if (!((c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '_' || c == '.' || c == '-'))
+            return false;
+    }
+
+    char command[96];
+    const int n = snprintf(command, sizeof(command), "/usr/sbin/mwan3 %s %s", action, name);
+    if (n <= 0 || (size_t)n >= sizeof(command)) return false;
+
+    const int rc = system(command);
+    if (rc != 0)
+    {
+        LOG_WARN("mwan3 %s %s 执行失败 (status=%d), 退回 ip link", action, name, rc);
+        return false;
+    }
+    LOG_INFO("mwan3 %s %s 成功", action, name);
+    return true;
+#else
+    (void)action;
+    return false;
+#endif
+}
+
 static bool run_ip(const char* action)
 {
 #ifdef __OPENWRT__
@@ -114,7 +159,7 @@ static void take_line_down(const bool auth_failure)
     if (!iface_control_allowed() || (auth_failure ? !g_runtime_cfg.line_down_on_auth_failed : !g_runtime_cfg.line_down_on_session_invalid)) return;
     runtime_status_t* s = &g_prog_status[tl_thread_idx].runtime_status;
     if (s->line_is_down) return;
-    if (!run_ip("down"))
+    if (!run_mwan3("ifdown") && !run_ip("down"))
     {
         LOG_WARN("接口未成功 down，保持 line_down=false，按现有认证失败路径处理");
         return;
@@ -191,7 +236,7 @@ bool line_control_tick(void)
             sleep_ms(wait > 5000 ? 5000 : wait, false);
             return false;
         }
-        if (run_ip("up"))
+        if (run_mwan3("ifup") || run_ip("up"))
         {
             s->line_is_down = false;
             s->line_force_auth = true;
@@ -220,7 +265,7 @@ void line_control_restore_on_shutdown(void)
         if (!p->runtime_status.line_is_down || !g_runtime_cfg.line_control_enabled || p->login_cfg.iface[0] == '\0') continue;
         const int8_t old_idx = tl_thread_idx;
         tl_thread_idx = (int8_t)i;
-        if (run_ip("up"))
+        if (run_mwan3("ifup") || run_ip("up"))
         {
             p->runtime_status.line_is_down = false;
             persist_state();
