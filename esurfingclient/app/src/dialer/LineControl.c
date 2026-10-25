@@ -114,7 +114,11 @@ static void take_line_down(const bool auth_failure)
     if (!iface_control_allowed() || (auth_failure ? !g_runtime_cfg.line_down_on_auth_failed : !g_runtime_cfg.line_down_on_session_invalid)) return;
     runtime_status_t* s = &g_prog_status[tl_thread_idx].runtime_status;
     if (s->line_is_down) return;
-    (void)run_ip("down");
+    if (!run_ip("down"))
+    {
+        LOG_WARN("接口未成功 down，保持 line_down=false，按现有认证失败路径处理");
+        return;
+    }
     s->line_is_down = true;
     s->line_down_at_ms = now_ms();
     s->line_restore_backoff_sec = g_runtime_cfg.line_restore_delay_sec;
@@ -127,7 +131,6 @@ void line_control_session_invalid(const char* reason)
 {
     if (g_prog_status == NULL || tl_thread_idx < 0 || tl_thread_idx >= g_prog_cnt) return;
     line_control_set_state(LINE_STATE_SESSION_INVALID, reason);
-    /* Set the logical gate even if ip exits unsuccessfully, so auth retries cannot hammer a dead line. */
     take_line_down(false);
 }
 
