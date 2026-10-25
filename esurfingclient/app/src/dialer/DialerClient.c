@@ -170,6 +170,62 @@ static bool confirm_session_alive(void)
     return true;
 }
 
+/**
+ * @brief 清空 302 风暴计数
+ *
+ * 线路恢复正常（心跳成功）时调用：下次再遇到 302 重新从"允许次数"算起，
+ * 不会因为历史记录一直背着退避。
+ */
+static void portal_storm_reset(void)
+{
+    if (tl_thread_idx < 0) return;
+    runtime_status_t* s = &g_prog_status[tl_thread_idx].runtime_status;
+    s->portal_hit_count = 0;
+    s->portal_backoff_sec = 0;
+    memset(s->portal_hits_ms, 0, sizeof(s->portal_hits_ms));
+}
+
+/**
+ * @brief 记录一次"确认 302 且需要重登"，判断是否要退避
+ *
+ * 单次 302 仍然立即重登（保留断网恢复时的无缝衔接）；
+ * 只有在窗口内反复 302 时才退避，避免多账号一起刷登录触发限流。
+ *
+ * @return 需要等待的秒数，0 表示立即重登
+ */
+static uint32_t portal_storm_record(void)
+{
+    if (tl_thread_idx < 0) return 0;
+    runtime_status_t* s = &g_prog_status[tl_thread_idx].runtime_status;
+
+    const uint64_t now = get_steady_tm_ms();
+    const uint8_t cap = (uint8_t)(sizeof(s->portal_hits_ms) / sizeof(s->portal_hits_ms[0]));
+    for (uint8_t i = (uint8_t)(cap - 1); i > 0; i--) s->portal_hits_ms[i] = s->portal_hits_ms[i - 1];
+    s->portal_hits_ms[0] = now;
+    if (s->portal_hit_count < cap) s->portal_hit_count++;
+
+    const uint64_t window_ms = (uint64_t)g_runtime_cfg.auth_portal_window_sec * 1000;
+    uint32_t in_window = 0;
+    for (uint8_t i = 0; i < s->portal_hit_count; i++)
+    {
+        if (now - s->portal_hits_ms[i] <= window_ms) in_window++;
+    }
+
+    if (in_window <= g_runtime_cfg.auth_portal_max_events) return 0;
+
+    uint32_t wait = (s->portal_backoff_sec == 0)
+        ? g_runtime_cfg.auth_portal_backoff_sec
+        : s->portal_backoff_sec * 2;
+    if (wait > g_runtime_cfg.auth_portal_backoff_max_sec)
+        wait = g_runtime_cfg.auth_portal_backoff_max_sec;
+    s->portal_backoff_sec = wait;
+
+    LOG_WARN("账号 %u 在 %u 秒内第 %u 次遇到门户重定向，退避 %u 秒后再认证",
+             g_prog_status[tl_thread_idx].login_cfg.idx,
+             g_runtime_cfg.auth_portal_window_sec, in_window, wait);
+    return wait;
+}
+
 static bool pause_reauth_if_disabled(void)
 {
     if (g_runtime_cfg.reconnect_enabled) return false;
@@ -219,6 +275,7 @@ static RunStatus run(void)
         if (confirm_session_alive())
         {
             line_control_set_state(LINE_STATE_KEEP_OK, "门户探测后心跳确认会话有效");
+            portal_storm_reset();
             g_prog_status[tl_thread_idx].auth_cfg.tick = get_steady_tm_ms();
             sleep_ms((uint64_t)g_runtime_cfg.probe_interval_sec * 1000, false);
             return RUN_SUCCESS;
@@ -282,6 +339,7 @@ static RunStatus run(void)
                         sleep_ms((uint64_t)(g_runtime_cfg.keepalive_retry_interval_sec + jitter) * 1000, true);
                     }
                     line_control_set_state(LINE_STATE_KEEP_OK, "心跳成功");
+                    portal_storm_reset();
                     LOG_DEBUG("下一次发送心跳包: %" PRIu64 " 秒后",
                         g_prog_status[tl_thread_idx].auth_cfg.keep_retry);
                     g_prog_status[tl_thread_idx].auth_cfg.tick = get_steady_tm_ms(); // 重新给 tick 赋值 (与上面同源, 都用单调钟)
@@ -302,6 +360,15 @@ static RunStatus run(void)
             LOG_INFO("认证前等待配置的最小间隔 %u 秒", g_runtime_cfg.session_invalid_wait_sec);
             sleep_ms((uint64_t)g_runtime_cfg.session_invalid_wait_sec * 1000, true);
         }
+
+        /**
+         * 302 风暴退避：偶发一次立即重登，窗口内反复出现才退避。
+         * 见 BadGhost 的建议 "短时间 302 多次就退避式"。
+         */
+        /* 只有"已建立的会话被 302"才算一次风暴事件；启动阶段的首次 302 是正常流程 */
+        const bool was_authed = g_prog_status[tl_thread_idx].runtime_status.is_authed;
+        const uint32_t storm_wait = was_authed ? portal_storm_record() : 0;
+        if (storm_wait > 0) sleep_ms((uint64_t)storm_wait * 1000, true);
         if (g_prog_status[tl_thread_idx].runtime_status.is_initialized) // 进入认证流程的时候如果会话已经初始化, 重置认证配置参数
         {
             reset();

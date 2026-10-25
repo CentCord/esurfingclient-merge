@@ -392,7 +392,10 @@ return view.extend({
                 max_sec: 1800, jitter_sec: 15,
                 line_error_max_attempts: 5, line_error_interval_sec: 10
             },
-            auth: { connect_timeout_sec: 10, request_timeout_sec: 15, stagger_sec: 20, session_invalid_wait_sec: 0 },
+            auth: {
+                connect_timeout_sec: 10, request_timeout_sec: 15, stagger_sec: 20, session_invalid_wait_sec: 0,
+                portal_storm: { window_sec: 120, max_events: 3, backoff_sec: 30, backoff_max_sec: 600 }
+            },
             keepalive: {
                 interval_mode: 'server', interval_sec: 300, min_interval_sec: 30, max_interval_sec: 1800,
                 failure_retries: 5, retry_interval_sec: 3, retry_jitter_sec: 1
@@ -503,6 +506,10 @@ return view.extend({
             self.rtNum('会话失效后等待', 'runtime.auth.session_invalid_wait_sec', '秒；0 表示不额外等待'),
             self.rtNum('连接超时', 'runtime.auth.connect_timeout_sec', '秒'),
             self.rtNum('请求超时', 'runtime.auth.request_timeout_sec', '秒'),
+            self.rtNum('302 统计窗口', 'runtime.auth.portal_storm.window_sec', '秒；偶发一次门户重定向仍立即重登，窗口内反复出现才退避'),
+            self.rtNum('窗口内允许次数', 'runtime.auth.portal_storm.max_events', '超过这个次数开始退避；默认 3'),
+            self.rtNum('退避起始时长', 'runtime.auth.portal_storm.backoff_sec', '秒；首次超限后等待多久，默认 30'),
+            self.rtNum('退避上限', 'runtime.auth.portal_storm.backoff_max_sec', '秒；指数增长的上限，默认 600'),
 
             E('h4', {}, '重连'),
             self.rtBool('启用自动重连', 'runtime.reconnect.enabled', '关闭后认证失败只尝试一次，进入停止状态'),

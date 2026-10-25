@@ -72,6 +72,11 @@ typedef struct
     uint32_t auth_connect_timeout_sec;
     uint32_t auth_request_timeout_sec;
     uint32_t auth_stagger_sec;
+    /** 302 风暴退避：窗口内允许的重登次数、超限后的起始退避与上限 */
+    uint32_t auth_portal_window_sec;
+    uint32_t auth_portal_max_events;
+    uint32_t auth_portal_backoff_sec;
+    uint32_t auth_portal_backoff_max_sec;
     uint32_t session_invalid_wait_sec;
     keep_interval_mode_t keepalive_interval_mode;
     uint32_t keepalive_interval_sec;
@@ -191,6 +196,10 @@ typedef struct
     char last_error_code[AUTH_ERROR_CODE_LEN];
     char last_sub_error[AUTH_ERROR_CODE_LEN];
     char last_error_msg[AUTH_ERROR_MSG_LEN];
+    /** 302 风暴检测：最近若干次"确认 302 且需要重登"的时刻（毫秒，单调钟） */
+    uint64_t portal_hits_ms[8];
+    uint8_t portal_hit_count;
+    uint32_t portal_backoff_sec;
 } runtime_status_t;
 
 typedef struct

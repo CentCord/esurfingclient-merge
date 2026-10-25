@@ -39,7 +39,7 @@ static const cfg_def_t s_cfg_defaults[] = {
     {"op_timeout",       CFG_DEF_NUM, false, DEFAULT_OP_TIMEOUT, NULL, "秒"},
     {"web_port",         CFG_DEF_NUM, false, DEFAULT_WEB_PORT, NULL, NULL},
     {"runtime",          CFG_DEF_OBJ, false, 0,
-     "{\"reconnect\":{\"enabled\":true,\"max_attempts\":0,\"line_error_max_attempts\":5,\"line_error_interval_sec\":10,\"backoff\":\"sequence\",\"intervals_sec\":[60,180,300,600,1200,1800],\"fixed_interval_sec\":300,\"base_sec\":60,\"multiplier\":2.0,\"max_sec\":1800,\"jitter_sec\":15},\"auth\":{\"connect_timeout_sec\":10,\"request_timeout_sec\":15,\"stagger_sec\":20,\"session_invalid_wait_sec\":0},\"keepalive\":{\"interval_mode\":\"server\",\"interval_sec\":300,\"min_interval_sec\":30,\"max_interval_sec\":1800,\"failure_retries\":5,\"retry_interval_sec\":3,\"retry_jitter_sec\":1},\"probe\":{\"interval_sec\":2,\"connect_timeout_ms\":3000,\"request_timeout_ms\":4000,\"line_error_tolerance\":3,\"portal_confirmations\":2},\"line_control\":{\"enabled\":true,\"down_on_session_invalid\":true,\"down_on_auth_failed\":false,\"restore_delay_sec\":30,\"restore_max_backoff_sec\":600},\"isolation\":{\"rate_limit_sec\":1800},\"log\":{\"hot_reload\":false}}", NULL},
+     "{\"reconnect\":{\"enabled\":true,\"max_attempts\":0,\"line_error_max_attempts\":5,\"line_error_interval_sec\":10,\"backoff\":\"sequence\",\"intervals_sec\":[60,180,300,600,1200,1800],\"fixed_interval_sec\":300,\"base_sec\":60,\"multiplier\":2.0,\"max_sec\":1800,\"jitter_sec\":15},\"auth\":{\"connect_timeout_sec\":10,\"request_timeout_sec\":15,\"stagger_sec\":20,\"session_invalid_wait_sec\":0,\"portal_storm\":{\"window_sec\":120,\"max_events\":3,\"backoff_sec\":30,\"backoff_max_sec\":600}},\"keepalive\":{\"interval_mode\":\"server\",\"interval_sec\":300,\"min_interval_sec\":30,\"max_interval_sec\":1800,\"failure_retries\":5,\"retry_interval_sec\":3,\"retry_jitter_sec\":1},\"probe\":{\"interval_sec\":2,\"connect_timeout_ms\":3000,\"request_timeout_ms\":4000,\"line_error_tolerance\":3,\"portal_confirmations\":2},\"line_control\":{\"enabled\":true,\"down_on_session_invalid\":true,\"down_on_auth_failed\":false,\"restore_delay_sec\":30,\"restore_max_backoff_sec\":600},\"isolation\":{\"rate_limit_sec\":1800},\"log\":{\"hot_reload\":false}}", NULL},
 };
 
 static uint8_t complete_object_from_template(cJSON* object, const cJSON* defaults, const char* prefix)
@@ -102,6 +102,15 @@ void runtime_config_defaults(runtime_config_t* cfg)
     cfg->keepalive_retry_interval_sec = 3;
     cfg->keepalive_retry_jitter_sec = 1;
     cfg->auth_stagger_sec = 20;
+
+    /**
+     * 302 风暴退避：正常情况下 302 立刻重登（保留无缝衔接），
+     * 但同一账号在窗口内反复 302 就退避，避免多账号一起刷登录。
+     */
+    cfg->auth_portal_window_sec = 120;
+    cfg->auth_portal_max_events = 3;
+    cfg->auth_portal_backoff_sec = 30;
+    cfg->auth_portal_backoff_max_sec = 600;
     cfg->reconnect_jitter_sec = 15;
     cfg->probe_interval_sec = 2;
     cfg->probe_connect_timeout_ms = 3000;
@@ -266,6 +275,22 @@ void runtime_config_load(const cJSON* cfg_json, runtime_config_t* out)
         isolation = NULL;
     }
     out->isolation_rate_limit_sec = runtime_uint(isolation, "rate_limit_sec", 1800, 1, 86400);
+
+    /* runtime.auth.portal_storm：302 风暴退避 */
+    const cJSON* auth_group = cJSON_GetObjectItem(root, "auth");
+    const cJSON* storm = (auth_group != NULL && cJSON_IsObject(auth_group))
+        ? cJSON_GetObjectItem(auth_group, "portal_storm") : NULL;
+    if (storm != NULL && !cJSON_IsObject(storm))
+    {
+        LOG_WARN("runtime.auth.portal_storm 必须是对象，回退该组默认值");
+        storm = NULL;
+    }
+    out->auth_portal_window_sec = runtime_uint(storm, "window_sec", 120, 10, 86400);
+    out->auth_portal_max_events = runtime_uint(storm, "max_events", 3, 1, 64);
+    out->auth_portal_backoff_sec = runtime_uint(storm, "backoff_sec", 30, 1, 86400);
+    out->auth_portal_backoff_max_sec = runtime_uint(storm, "backoff_max_sec", 600, 1, 86400);
+    if (out->auth_portal_backoff_max_sec < out->auth_portal_backoff_sec)
+        out->auth_portal_backoff_max_sec = out->auth_portal_backoff_sec;
 
     /* runtime.log：热切换日志等级默认关闭；开启后进程每秒 stat 一次配置文件 */
     const cJSON* log_group = cJSON_GetObjectItem(root, "log");
