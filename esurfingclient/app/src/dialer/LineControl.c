@@ -144,16 +144,21 @@ void line_control_auth_failure(const char* error_code, const char* sub_error, co
     {
         s->rate_limited_until_ms = now_ms() + (uint64_t)g_runtime_cfg.isolation_rate_limit_sec * 1000;
         line_control_set_state(LINE_STATE_RATE_LIMITED, reason ? reason : "11064000");
+        take_line_down(true);
         return;
     }
     if (error_code_lookup(error_code, sub_error, NULL, 0) == AUTH_ERROR_FATAL)
     {
         s->is_retry_paused = true;
         line_control_set_state(LINE_STATE_FATAL, reason ? reason : "13012000");
-        if (g_runtime_cfg.line_down_on_auth_failed) take_line_down(true);
+        take_line_down(true);
         return;
     }
-    if (g_runtime_cfg.line_down_on_auth_failed) line_control_session_invalid(reason ? reason : "认证失败");
+    if (g_runtime_cfg.line_down_on_auth_failed)
+    {
+        line_control_set_state(LINE_STATE_SESSION_INVALID, reason ? reason : "认证失败");
+        take_line_down(true);
+    }
 }
 
 bool line_control_tick(void)
