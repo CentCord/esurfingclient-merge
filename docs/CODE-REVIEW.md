@@ -37,3 +37,26 @@
 - Python auth/session/crypto：`auth.py:139-203,288-432,444-496,544-641`；`session.py:32-106,386-489,545-620`；`crypto.py:9-33,85-100,157-208,465-477,686-743`。除 R-07/R-08 外，`session.py:589` 使用 `advanced` 子对象解析 ticket URL，可能丢失嵌套配置；`:612-620` 在 state.cgi 300 或异常时仍可能以 0 退出；`auth.py:217-235` 与 `crypto.py:9-33` 共用可变全局密钥，构成同进程多账号风险。`crypto.py:85-100` 以 `assert` 校验网络数据，优化模式会移除校验；`:470-477` 的宽松 SM4 填充需先以真实密文检验兼容性，不能贸然收紧。完整 Python 审计见 `docs/ESURFACE-REVIEW.md`。
 
 Standards 轴：5 项硬约束问题、2 项启发式气味；最严重的是 S-01/S-02 的跨线及假摘线风险。Spec 轴：5 项 C 实现问题、2 项 Python 实现风险，另有 R-05 的 VM 验收边界；最严重的是 R-01 的禁重连失效和 R-03 的 mark 失败后串线风险。
+
+## D 阶段修复与复验
+
+上表行号指审查时的 `0ea8723` 代码；以下行号指本轮修复后的代码。每项优化单独提交，括号内为对应审查条目。
+
+| 提交 / 条目 | 变更证据 | 验证边界 |
+|---|---|---|
+| `1e09f46` / S-01、R-03 | `NetClientCurl.c:109-115`：SO_MARK 失败关闭 socket 并让 libcurl 得到 `CURL_SOCKET_BAD`，阻止该请求沿未标记路由发出。 | OpenWrt 宏分支语法检查通过；故障注入及 VM 实际选路尚未验证。 |
+| `5294621` / R-01 | `DialerClient.c:173-178,229-231,269-271` 在会话失效后检查禁重连；`LineControl.c:169-173` 暂停态不自动 up。 | OpenWrt 宏分支语法检查通过；带 iface 的 VM 复验待做。 |
+| `0d93515` / S-02、R-04 | `LineControl.c:117-125` 仅在 `ip down` 成功后记 `line_is_down` 和恢复时间。 | OpenWrt 宏分支语法检查通过；真实命令失败分支待 VM 注入。 |
+| `afa441b` / S-03、R-02 | `LineControl.c:112-114,137-161` 按认证失败开关独立决定 down，不再受会话失效开关阻断。 | OpenWrt 宏分支语法检查通过；所有配置组合的 VM 联动待做。 |
+| `39f7320` / S-05、R-06 | `ConfigDefaults.c:241-263` 对两个非对象 runtime 组告警并回退默认值。 | OpenWrt 宏分支语法检查通过。 |
+| `3f2ea2f` / H-01 | `Config.c:560-564,594-606` 校验 mark JSON 类型、完整十六进制、范围和非零值，非法账号跳过。 | OpenWrt 宏分支语法检查通过。 |
+| `9792e59` / H-02 | `ConfigAccounts.c:73-82` 在窄化前检查 channel 数值范围和整数性。 | OpenWrt 宏分支语法检查通过。 |
+| `5892313` / S-04 | `DialerClient.c:236-239` 的 204 不再覆盖最近一次 `KEEP_OK`；`tests/mock/evidence/c-native-normal-after-s04.log:5-6` 只有初次 `INTERNET_OK → KEEP_OK`，之后的探测没有重复 INFO。 | 本机 85 个 C 源文件编译，normal/session_expire_after/rate_limit 三场景通过；七态单枚举仍不能同时表达路径和会话，见下节。 |
+| `7ad59c0` / H-03 | `DialerNet.c:49-55,76-90,184-192` 检查 HTTP 200 错误头，保留 ticket 的 `Error-Code=200 + ZSM` 特例；`tests/mock/evidence/c-native-rate_limit_http_200-before-h03.log:4-16` 显示旧版每秒重登，修复后的 `c-native-rate_limit_http_200.jsonl:10-11` 和同名前缀 `.log:4-6` 显示 HTTP 200 下进入 `RATE_LIMITED`。 | 本机 C 四场景全部通过；Python mock 全部 12 场景通过。真实服务端是否用 HTTP 200 返回此类错误仍需抓包确认。 |
+
+## 保留的限制
+
+- S-04 的 INFO 抖动只修复健康 204/keep 的重复切换。单一 `line_state` 仍不能并列保存路径探测结果和会话心跳结果；`portal_redirect_all` 持续发生时可能继续在 `PORTAL_REDIRECT` 与 `KEEP_OK` 间切换。后续状态输出设计应分别记录两种观察值。
+- S-06 两处心跳间隔扣除超时余量目前一致；S-07 默认值分布在模板、结构体初始化和解析中。没有已观察到的行为错误，且本轮要求保持 r7 缺省行为，因此不做无证据的抽象重排。
+- R-07、R-08 及 Python `session.py`、`crypto.py` 的其他风险保留在 `docs/ESURFACE-REVIEW.md`；本轮按约束没有修改 Python 业务代码。
+- R-05 仍需在 OpenWrt VM 验证 SO_MARK 失败、带 iface 的 down/up、mwan3 摘线与恢复。本机 mock 使用 `iface=""`，不能代替这项验收。发布包仍只来自 `esurfingclient/app`，`tests/mock/` 不进入发布包（`esurfingclient/Makefile:27-35`）。
