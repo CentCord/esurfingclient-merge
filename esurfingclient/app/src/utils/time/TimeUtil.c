@@ -120,11 +120,23 @@ void sleep_ms(const uint64_t ms, const bool can_stop)
     }
     else
     {
+        /**
+         * 不可中断的睡眠也要分段：认证循环里大量使用 sleep_ms(..., false)
+         * （探测间隔、心跳等待），一次性 usleep 期间无法响应日志等级变更。
+         * 按 1 秒切片，语义不变，只是把"一口气睡完"改成"每秒醒一次"。
+         */
+        uint64_t left = ms;
+        while (left > 0)
+        {
+            const uint64_t step = left > 1000 ? 1000 : left;
 #ifdef _WIN32
-        Sleep(ms);
+            Sleep((DWORD)step);
 #else
-        usleep(ms * 1000);
+            usleep(step * 1000);
 #endif
+            left -= step;
+            log_level_watch();
+        }
     }
 }
 
