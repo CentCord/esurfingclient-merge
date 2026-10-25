@@ -737,22 +737,21 @@ void work(void)
                 LOG_DEBUG("当前时刻 (单调钟): %" PRIu64 ", 已认证: %" PRIu64 " 毫秒",
                     get_steady_tm_ms(),
                     get_steady_tm_ms() - g_prog_status[i].auth_cfg.auth_time);
-                LOG_WARN("认证时间超过 172200000 毫秒 (1 天 23 时 50 分), 为避免被远程服务器踢下线, 正在重新进行认证");
-                for (uint8_t j = 0; j < g_prog_cnt; j++)
+                LOG_WARN("账号 %u 认证时间超过 172200000 毫秒 (1 天 23 时 50 分), 仅重认证本账号",
+                         g_prog_status[i].login_cfg.idx);
+                g_prog_status[i].runtime_status.is_need_reauth = true;
+                uint8_t retry_wte = 1;
+                while (g_prog_status[i].runtime_status.is_authed)
                 {
-                    g_prog_status[j].runtime_status.is_need_reauth = true;
-                    uint8_t retry_wte = 1;
-                    while (g_prog_status[j].runtime_status.is_authed)
+                    if (retry_wte > 5)
                     {
-                        if (retry_wte > 5)
-                        {
-                            LOG_ERROR("超过重试次数, 强制退出线程");
-                            sim_thread_destroy(g_prog_status[j].thread);
-                        }
-                        LOG_DEBUG("等待配置 %" PRIu8 " 登出, 下标 %" PRIu8 ", 等待次数: %" PRIu8 ", 最多 5 次", g_prog_status[j].login_cfg.idx, j, retry_wte);
-                        retry_wte++;
-                        sleep_ms(2000, true);
+                        LOG_ERROR("超过重试次数, 强制退出线程");
+                        sim_thread_destroy(g_prog_status[i].thread);
                     }
+                    LOG_DEBUG("等待配置 %" PRIu8 " 登出, 下标 %" PRIu8 ", 等待次数: %" PRIu8 " 次",
+                              g_prog_status[i].login_cfg.idx, i, retry_wte);
+                    retry_wte++;
+                    sleep_ms(2000, true);
                 }
             }
 
