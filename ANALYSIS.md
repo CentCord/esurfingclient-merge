@@ -166,8 +166,24 @@
 | `runtime.probe.request_timeout_ms` | 整数；4000；500–60000 | 探测请求总超时及 multi deadline；必须不小于连接超时 | `ConfigDefaults.c:225-231`; `CheckNetwork.c:134-140, 283` |
 | `runtime.probe.line_error_tolerance` | 整数；1；1–20 | 连续线路探测失败阈值；1 保留 r7 单次判定 | `ConfigDefaults.c:232`; `CheckNetwork.c:362-370` |
 | `runtime.probe.portal_confirmations` | 整数；1；1–10 | 连续 302 确认次数；1 保留 r7 单次判定 | `ConfigDefaults.c:233`; `CheckNetwork.c:371-377` |
+| `accounts[].iface` | string；空；空或 1–15 个 `[a-z0-9_.-]` 字符 | 显式指定后才允许线路控制；空/非法时不执行接口命令 | `ConfigDefaults.c` 账号默认表；`Config.c` `fill_account()`；`Dialer/LineControl.c` |
+| `runtime.line_control.enabled` | bool；true | 线路控制总开关；即使开启，仍要求当前账号有 iface | `ConfigDefaults.c` runtime 默认；`LineControl.c` `iface_control_allowed()` |
+| `runtime.line_control.down_on_session_invalid` | bool；true | 会话确认失效后将指定接口 down；仅 iface 有效时 | `ConfigDefaults.c`; `LineControl.c` `line_control_session_invalid()` |
+| `runtime.line_control.down_on_auth_failed` | bool；false | 普通认证失败或致命认证错误是否 down 指定接口 | `ConfigDefaults.c`; `LineControl.c` `line_control_auth_failure()` |
+| `runtime.line_control.restore_delay_sec` | 整数；30；0–86400 | 接口 down 后首次 up 前等待时间 | `ConfigDefaults.c`; `LineControl.c` `line_control_tick()` |
+| `runtime.line_control.restore_max_backoff_sec` | 整数；600；1–86400 | 接口 up 失败时指数退避上限 | `ConfigDefaults.c`; `LineControl.c` `line_control_tick()` |
+| `runtime.isolation.rate_limit_sec` | 整数；1800；1–86400 | 收到 11064000 后本账号隔离时长；不影响其它账号进程 | `ConfigDefaults.c`; `LineControl.c` `line_control_auth_failure()` |
 
 旧根级 `conn_timeout`/`op_timeout` 在首次创建 runtime 配置时迁移到 `runtime.auth`；新版/旧版 LuCI 的现有超时输入同时回写 runtime.auth，以后以 runtime 值为准。实现未添加规格外的 `infinite` 开关；max_attempts=0 表示认证重试不设上限，enabled=false 表示一次失败后暂停。错误码分类为 fatal/slow 的现有处理仍保留。
+
+### 4.4 阶段 3 实现补充
+
+- 探测结果仍是路径观察值。账号已认证而探测到门户时，先对本账号发送 keep 心跳确认会话；keep 成功保留会话，连续失败达到 `runtime.keepalive.failure_retries` 后才进入 `SESSION_INVALID`。路径错误只转为 `PATH_ERROR`。
+- 账号未配置 `iface`（或 iface 校验失败为空）时，线路控制模块不调用 `system()`，因此旧配置不会改变接口状态。有效 iface 使用 `/sbin/ip link set dev <iface> down/up`；设备名在解析和命令前均校验字符集及长度。
+- `11064000` 本账号进入 `RATE_LIMITED`，缺省 1800 秒；错误码表分类为 fatal 的认证失败进入 `FATAL`，暂停当前账号进程，直到服务重启。状态写入 `/var/run/esurfing/<account>.state`。
+- 指定接口在会话失效后 down，等待配置延迟再 up；up 失败按指数间隔重试并受 max backoff 限制。停止收尾时恢复本进程已 down 的接口。其它账号由独立 auth 进程持有状态，互不共享暂停位和隔离截止时间。
+- 状态转换日志包含账号、mark、iface、旧状态、新状态和原因。阶段 3 不提供跨进程认证调度，也不更改 mwan3。
+- rpcd ACL 允许 LuCI 读取 `/var/run/esurfing/*.state`；尚未在 LuCI 页面新增多拨状态卡片（阶段 5 范围）。
 
 ### 4.3 建议状态流
 

@@ -39,7 +39,7 @@ static const cfg_def_t s_cfg_defaults[] = {
     {"op_timeout",       CFG_DEF_NUM, false, DEFAULT_OP_TIMEOUT, NULL, "秒"},
     {"web_port",         CFG_DEF_NUM, false, DEFAULT_WEB_PORT, NULL, NULL},
     {"runtime",          CFG_DEF_OBJ, false, 0,
-     "{\"reconnect\":{\"enabled\":true,\"max_attempts\":0,\"line_error_max_attempts\":5,\"line_error_interval_sec\":10,\"backoff\":\"sequence\",\"intervals_sec\":[60,180,300,600,1200,1800],\"fixed_interval_sec\":300,\"base_sec\":60,\"multiplier\":2.0,\"max_sec\":1800,\"jitter_sec\":0},\"auth\":{\"connect_timeout_sec\":10,\"request_timeout_sec\":15,\"stagger_sec\":0,\"session_invalid_wait_sec\":0},\"keepalive\":{\"interval_mode\":\"server\",\"interval_sec\":300,\"min_interval_sec\":30,\"max_interval_sec\":1800,\"failure_retries\":5,\"retry_interval_sec\":1,\"retry_jitter_sec\":0},\"probe\":{\"interval_sec\":2,\"connect_timeout_ms\":3000,\"request_timeout_ms\":4000,\"line_error_tolerance\":1,\"portal_confirmations\":1}}", NULL},
+     "{\"reconnect\":{\"enabled\":true,\"max_attempts\":0,\"line_error_max_attempts\":5,\"line_error_interval_sec\":10,\"backoff\":\"sequence\",\"intervals_sec\":[60,180,300,600,1200,1800],\"fixed_interval_sec\":300,\"base_sec\":60,\"multiplier\":2.0,\"max_sec\":1800,\"jitter_sec\":0},\"auth\":{\"connect_timeout_sec\":10,\"request_timeout_sec\":15,\"stagger_sec\":0,\"session_invalid_wait_sec\":0},\"keepalive\":{\"interval_mode\":\"server\",\"interval_sec\":300,\"min_interval_sec\":30,\"max_interval_sec\":1800,\"failure_retries\":5,\"retry_interval_sec\":1,\"retry_jitter_sec\":0},\"probe\":{\"interval_sec\":2,\"connect_timeout_ms\":3000,\"request_timeout_ms\":4000,\"line_error_tolerance\":1,\"portal_confirmations\":1},\"line_control\":{\"enabled\":true,\"down_on_session_invalid\":true,\"down_on_auth_failed\":false,\"restore_delay_sec\":30,\"restore_max_backoff_sec\":600},\"isolation\":{\"rate_limit_sec\":1800}}", NULL},
 };
 
 static uint8_t complete_object_from_template(cJSON* object, const cJSON* defaults, const char* prefix)
@@ -73,6 +73,7 @@ static const cfg_def_t s_account_defaults[] = {
     {"password",     CFG_DEF_STR, false, 0, "", NULL},
     {"channel",      CFG_DEF_NUM, false, DEFAULT_CHANNEL, NULL, NULL},
     {"mark",         CFG_DEF_STR, false, 0, "", NULL},
+    {"iface",        CFG_DEF_STR, false, 0, "", NULL},
     {"time_windows", CFG_DEF_ARR, false, 0, NULL, NULL},
 };
 
@@ -105,6 +106,11 @@ void runtime_config_defaults(runtime_config_t* cfg)
     /* r7 每次探测直接采用结果，不做连续次数确认，缺省保持兼容。 */
     cfg->probe_line_error_tolerance = 1;
     cfg->probe_portal_confirmations = 1;
+    cfg->line_control_enabled = true;
+    cfg->line_down_on_session_invalid = true;
+    cfg->line_restore_delay_sec = 30;
+    cfg->line_restore_max_backoff_sec = 600;
+    cfg->isolation_rate_limit_sec = 1800;
 }
 
 static uint32_t runtime_uint(const cJSON* obj, const char* key, const uint32_t fallback,
@@ -231,6 +237,21 @@ void runtime_config_load(const cJSON* cfg_json, runtime_config_t* out)
     }
     out->probe_line_error_tolerance = runtime_uint(probe, "line_error_tolerance", 1, 1, 20);
     out->probe_portal_confirmations = runtime_uint(probe, "portal_confirmations", 1, 1, 10);
+
+    const cJSON* line = cJSON_GetObjectItem(root, "line_control");
+    const cJSON* item = cJSON_GetObjectItem(line, "enabled");
+    if (item != NULL && cJSON_IsBool(item)) out->line_control_enabled = cJSON_IsTrue(item);
+    else if (item != NULL) LOG_WARN("runtime.line_control.enabled 类型非法，回退 true");
+    item = cJSON_GetObjectItem(line, "down_on_session_invalid");
+    if (item != NULL && cJSON_IsBool(item)) out->line_down_on_session_invalid = cJSON_IsTrue(item);
+    else if (item != NULL) LOG_WARN("runtime.line_control.down_on_session_invalid 类型非法，回退 true");
+    item = cJSON_GetObjectItem(line, "down_on_auth_failed");
+    if (item != NULL && cJSON_IsBool(item)) out->line_down_on_auth_failed = cJSON_IsTrue(item);
+    else if (item != NULL) LOG_WARN("runtime.line_control.down_on_auth_failed 类型非法，回退 false");
+    out->line_restore_delay_sec = runtime_uint(line, "restore_delay_sec", 30, 0, 86400);
+    out->line_restore_max_backoff_sec = runtime_uint(line, "restore_max_backoff_sec", 600, 1, 86400);
+    const cJSON* isolation = cJSON_GetObjectItem(root, "isolation");
+    out->isolation_rate_limit_sec = runtime_uint(isolation, "rate_limit_sec", 1800, 1, 86400);
 }
 
 /**
@@ -367,6 +388,7 @@ uint8_t complete_cfg(cJSON* cfg_json)
             cJSON_AddStringToObject(account, "password", "");
             cJSON_AddNumberToObject(account, "channel", DEFAULT_CHANNEL);
             cJSON_AddStringToObject(account, "mark", "");
+            cJSON_AddStringToObject(account, "iface", "");
             cJSON_AddArrayToObject(account, "time_windows");
             cJSON_AddItemToArray(new_accounts, account);
 

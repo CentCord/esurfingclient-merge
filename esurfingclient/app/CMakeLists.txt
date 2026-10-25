@@ -92,6 +92,7 @@ add_executable(ESurfingClient
         src/dialer/DialerLocation.c
         src/dialer/DialerSession.c
         src/dialer/ErrorCode.c
+        src/dialer/LineControl.c
         src/dialer/DialerTicket.c
         src/dialer/DialerClient.c
         src/dialer/LogoutState.c

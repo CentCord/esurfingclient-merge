@@ -51,6 +51,9 @@
 
 typedef enum { RETRY_FIXED = 0, RETRY_EXPONENTIAL, RETRY_SEQUENCE } retry_backoff_t;
 typedef enum { KEEP_INTERVAL_SERVER = 0, KEEP_INTERVAL_FIXED, KEEP_INTERVAL_CLAMPED } keep_interval_mode_t;
+typedef enum { LINE_STATE_UNKNOWN = 0, LINE_STATE_INTERNET_OK, LINE_STATE_PORTAL_REDIRECT,
+               LINE_STATE_PATH_ERROR, LINE_STATE_KEEP_OK, LINE_STATE_SESSION_INVALID,
+               LINE_STATE_RATE_LIMITED, LINE_STATE_FATAL } line_state_t;
 
 typedef struct
 {
@@ -82,6 +85,12 @@ typedef struct
     uint32_t probe_request_timeout_ms;
     uint32_t probe_line_error_tolerance;
     uint32_t probe_portal_confirmations;
+    bool line_control_enabled;
+    bool line_down_on_session_invalid;
+    bool line_down_on_auth_failed;
+    uint32_t line_restore_delay_sec;
+    uint32_t line_restore_max_backoff_sec;
+    uint32_t isolation_rate_limit_sec;
 } runtime_config_t;
 
 typedef enum
@@ -147,6 +156,7 @@ typedef struct
     uint8_t chn;
     char user_agent[USER_AGENT_LEN];
     uint32_t mark;
+    char iface[IF_LEN];
     bool use_cus_mark;
     time_window_t time_windows[MAX_TIME_WINDOWS];
     uint8_t time_window_count;
@@ -166,6 +176,13 @@ typedef struct
     bool is_need_reauth;
     bool is_time_disabled;
     bool is_retry_paused;
+    bool line_is_down;
+    bool line_force_auth;
+    uint64_t line_down_at_ms;
+    uint64_t line_next_restore_ms;
+    uint32_t line_restore_backoff_sec;
+    uint64_t rate_limited_until_ms;
+    line_state_t line_state;
     /** 上次认证失败时服务端返回的码与翻译, 供日志与网页显示使用 */
     uint8_t last_error_kind;
     uint64_t last_error_at;

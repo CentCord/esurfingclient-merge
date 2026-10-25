@@ -82,6 +82,7 @@ void clean(void)
     // 时间控制禁用状态是跨线程的“外部闸门”，线程退出清理时不能把它清掉，
     // 否则线程守护会立刻把刚下线的账号重新拉起来。
     const bool time_disabled = g_prog_status[tl_thread_idx].runtime_status.is_time_disabled;
+    const runtime_status_t previous = g_prog_status[tl_thread_idx].runtime_status;
 
     if (g_prog_status[tl_thread_idx].runtime_status.is_initialized == true) // 如果已经初始化会话, 则进入
     {
@@ -97,6 +98,13 @@ void clean(void)
     memset(&g_prog_status[tl_thread_idx].auth_cfg, 0, sizeof(auth_cfg_t)); // 清除 auth_cfg 的内容, 并置零
     memset(&g_prog_status[tl_thread_idx].runtime_status, 0, sizeof(runtime_status_t)); // 清除 runtime_status 的内容, 并置零
     g_prog_status[tl_thread_idx].runtime_status.is_time_disabled = time_disabled; // 恢复时间控制禁用状态
+    g_prog_status[tl_thread_idx].runtime_status.line_state = previous.line_state;
+    g_prog_status[tl_thread_idx].runtime_status.line_is_down = previous.line_is_down;
+    g_prog_status[tl_thread_idx].runtime_status.line_force_auth = previous.line_force_auth;
+    g_prog_status[tl_thread_idx].runtime_status.line_down_at_ms = previous.line_down_at_ms;
+    g_prog_status[tl_thread_idx].runtime_status.line_next_restore_ms = previous.line_next_restore_ms;
+    g_prog_status[tl_thread_idx].runtime_status.line_restore_backoff_sec = previous.line_restore_backoff_sec;
+    g_prog_status[tl_thread_idx].runtime_status.rate_limited_until_ms = previous.rate_limited_until_ms;
 }
 
 void reset(void)

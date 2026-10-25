@@ -1,4 +1,5 @@
 #include "utils/runtime/Shutdown.h"
+#include "dialer/LineControl.h"
 
 #include "core/States.h"
 
@@ -84,6 +85,7 @@ void shut(const int8_t exit_code)
     time_control_stop(); // 等待时间控制定时线程退出
 
     LOG_DEBUG("清理资源中");
+    line_control_restore_on_shutdown();
     LOG_DEBUG("关闭线程");
     for (uint8_t i = 0; i < g_prog_cnt; i++)
     {

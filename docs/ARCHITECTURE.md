@@ -48,7 +48,7 @@ flowchart LR
 | `app/src/config/Config.c` | config | 读配置、按账号筛选、校验账号；加载后填充全局状态。 |
 | `app/src/config/ConfigDefaults.c`、`ConfigTimeWindow.c`、`ConfigAccounts.c`、`app/include/config/Config.h` | config | 默认值补全、时间窗口、账号模型/配置接口。 |
 | `app/src/core/States.c`、`app/include/core/States.h` | config/session/policy 状态（待收敛） | 当前集中定义全局配置与状态，是多个模块共享访问的过渡点。 |
-| `app/src/dialer/DialerAuth.c`、`DialerSession.c`、`DialerTicket.c`、`DialerLocation.c`、`DialerNet.c`、`DialerServer.c`、`LogoutState.c`、`ErrorCode.c`、`DialerClient.c` | session（部分 policy） | 登录流程、取票、心跳、登出、错误码和主循环；`DialerClient.c` 当前同时包含状态机与重试等待。 |
+| `app/src/dialer/DialerAuth.c`、`DialerSession.c`、`DialerTicket.c`、`DialerLocation.c`、`DialerNet.c`、`DialerServer.c`、`LogoutState.c`、`ErrorCode.c`、`DialerClient.c`、`LineControl.c` | session（部分 policy/control） | 登录流程、取票、心跳、登出、错误码和主循环；`LineControl.c` 负责可选的账号接口开关、隔离状态与状态文件。 |
 | `app/src/net/CheckNetwork.c` | probe | generate_204/认证服务器 HTTP 探测、Web 后台缓存。目标是逐账号线路探测；Web aggregate probe 目前没有账号上下文。 |
 | `app/src/net/NetClient.c`、`NetClientCurl.c`、`NetClientInternal.h`、`NetTraffic.c`、`app/include/net/*` | netio | CURL、headers、SO_MARK、响应处理和流量采样。`NetClientCurl.c` 放 socket callback，NetClient 请求函数负责绑定上下文。 |
 | `app/src/control/*`、`app/include/control/*` | control | 本机控制 IPC。 |
@@ -97,4 +97,4 @@ ip -s link show dummy0
 # 5. 如输出“诊断跳过”或“设置 SO_MARK 失败”，按 caller/index/errno 定位；确认非 root/缺少 CAP_NET_RAW 时也检查内核 SO_MARK 权限。
 ```
 
-当前执行环境不含 OpenWrt VM，以上为可复现步骤，不是本机已完成的实机验收。诊断日志现在使用 WARN 级别，确认修复后应删除或降回 VERBOSE，避免正常运行日志放大。
+用户已在 OpenWrt 虚拟机使用 4 个假账号验证：nft 计数器显示 dummy0=34、wan2_dev/wan3_dev/wan4_dev 各 18，确认探测 SYN 按各账号 mark 走对应接口。临时 socket 诊断日志保留为 VERBOSE，便于后续定位，不影响默认 INFO 日志。

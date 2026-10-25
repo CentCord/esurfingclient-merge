@@ -4,6 +4,7 @@
         "read": {
             "file": {
                 "/etc/config/esurfingclient": [ "read" ],
+                "/var/run/esurfing/*.state": [ "read", "list" ],
                 "/etc/init.d/esurfingclient": [ "exec" ],
                 "/var/log/*.log": ["read", "list"]
             }

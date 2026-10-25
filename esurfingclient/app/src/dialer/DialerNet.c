@@ -7,6 +7,7 @@
 #include "core/States.h"
 
 #include "dialer/ErrorCode.h"
+#include "dialer/LineControl.h"
 
 
 #include "utils/text/TextUtils.h"
@@ -332,6 +333,9 @@ WaitResult wait_need_auth(void)
         }
 
         const network_status_t net_state = check_network_status(true, 0); // auth 进程仅加载一个账号
+        if (net_state == STATUS_OK) line_control_set_state(LINE_STATE_INTERNET_OK, "线路探测成功");
+        else if (net_state == STATUS_NEED_AUTH) line_control_set_state(LINE_STATE_PORTAL_REDIRECT, "网络探测收到门户重定向");
+        else if (net_state == STATUS_ERROR) line_control_set_state(LINE_STATE_PATH_ERROR, "线路探测失败");
 
         // 状态真的变了才提示 (已联网 / 需要认证), 免得每 3 秒刷一条
         log_network_state_change(net_state);

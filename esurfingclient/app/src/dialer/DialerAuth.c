@@ -227,6 +227,9 @@ int work_auth(void)
         shut(1);
     }
 
+    /* 当前 auth 进程只持有一个账号；在启动期也设置线程索引，供状态记录等调用使用。 */
+    tl_thread_idx = 0;
+
     LOG_DEBUG("以认证进程运行, 负责配置 %" PRIu8, g_prog_status[0].login_cfg.idx);
 
     /**

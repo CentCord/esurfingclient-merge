@@ -7,6 +7,7 @@
 #include "net/NetClient.h"
 
 #include "dialer/ErrorCode.h"
+#include "dialer/LineControl.h"
 
 #include "core/States.h"
 
@@ -153,11 +154,28 @@ static bool wait_auth_retry(const uint64_t wait_seconds)
     }
 }
 
+static bool confirm_session_alive(void)
+{
+    uint32_t retries = 0;
+    while (heartbeat() == false)
+    {
+        if (retries >= g_runtime_cfg.keepalive_failure_retries) return false;
+        retries++;
+        const uint32_t jitter = retry_jitter(g_runtime_cfg.keepalive_retry_jitter_sec);
+        LOG_WARN("账号 %u 会话确认心跳失败，重试 %u/%u",
+                 g_prog_status[tl_thread_idx].login_cfg.idx, retries,
+                 g_runtime_cfg.keepalive_failure_retries);
+        sleep_ms((uint64_t)(g_runtime_cfg.keepalive_retry_interval_sec + jitter) * 1000, true);
+    }
+    return true;
+}
+
 static RunStatus run(void)
 {
     static uint32_t retry_timeout = 1;
     static uint32_t retry_auth = 1;
 
+    if (!line_control_tick()) return RUN_SUCCESS;
     if (g_prog_status[tl_thread_idx].runtime_status.is_retry_paused)
     {
         sleep_ms(1000, false);
@@ -175,14 +193,39 @@ static RunStatus run(void)
         return RUN_SUCCESS;
     }
 
-    const network_status_t net_state = check_network_status(true, tl_thread_idx); // 显式传入账号索引
+    network_status_t net_state = check_network_status(true, tl_thread_idx); // 显式传入账号索引
+    if (g_prog_status[tl_thread_idx].runtime_status.line_force_auth)
+    {
+        g_prog_status[tl_thread_idx].runtime_status.line_force_auth = false;
+        net_state = STATUS_NEED_AUTH;
+    }
 
     // 状态真的变了才提示 (已联网 / 需要认证), 免得每秒刷一条
     log_network_state_change(net_state);
 
+    /* 探测到门户只代表路径现象；已有会话必须先由 keep 响应确认是否失效。 */
+    if (net_state == STATUS_NEED_AUTH && g_prog_status[tl_thread_idx].runtime_status.is_authed)
+    {
+        line_control_set_state(LINE_STATE_PORTAL_REDIRECT, "线路探测收到门户重定向");
+        if (confirm_session_alive())
+        {
+            line_control_set_state(LINE_STATE_KEEP_OK, "门户探测后心跳确认会话有效");
+            g_prog_status[tl_thread_idx].auth_cfg.tick = get_steady_tm_ms();
+            sleep_ms((uint64_t)g_runtime_cfg.probe_interval_sec * 1000, false);
+            return RUN_SUCCESS;
+        }
+        const runtime_status_t* failed = &g_prog_status[tl_thread_idx].runtime_status;
+        line_control_auth_failure(failed->last_error_code, failed->last_sub_error, "门户探测后的会话确认失败");
+        if (failed->line_state == LINE_STATE_RATE_LIMITED || failed->line_state == LINE_STATE_FATAL)
+            return RUN_SUCCESS;
+        line_control_session_invalid("门户探测且会话心跳确认失败");
+        if (g_prog_status[tl_thread_idx].runtime_status.line_is_down) return RUN_SUCCESS;
+    }
+
     switch (net_state)
     {
     case STATUS_OK: // 正常联网
+        line_control_set_state(LINE_STATE_INTERNET_OK, "线路探测成功");
         retry_timeout = 1;
         retry_auth = 1;
         /**
@@ -208,6 +251,13 @@ static RunStatus run(void)
                         if (heartbeat_retries >= g_runtime_cfg.keepalive_failure_retries)
                         {
                             LOG_ERROR("超过最多重试次数");
+                            const runtime_status_t* failed = &g_prog_status[tl_thread_idx].runtime_status;
+                            line_control_auth_failure(failed->last_error_code, failed->last_sub_error, "心跳返回认证错误");
+                            if (failed->line_state == LINE_STATE_RATE_LIMITED || failed->line_state == LINE_STATE_FATAL)
+                                return RUN_SUCCESS;
+                            line_control_session_invalid("心跳连续失败，按会话失效处理");
+                            if (g_prog_status[tl_thread_idx].runtime_status.line_is_down)
+                                return RUN_SUCCESS;
                             if (!g_runtime_cfg.reconnect_enabled)
                             {
                                 g_prog_status[tl_thread_idx].runtime_status.is_retry_paused = true;
@@ -224,6 +274,7 @@ static RunStatus run(void)
                         const uint32_t jitter = retry_jitter(g_runtime_cfg.keepalive_retry_jitter_sec);
                         sleep_ms((uint64_t)(g_runtime_cfg.keepalive_retry_interval_sec + jitter) * 1000, true);
                     }
+                    line_control_set_state(LINE_STATE_KEEP_OK, "心跳成功");
                     LOG_DEBUG("下一次发送心跳包: %" PRIu64 " 秒后",
                         g_prog_status[tl_thread_idx].auth_cfg.keep_retry);
                     g_prog_status[tl_thread_idx].auth_cfg.tick = get_steady_tm_ms(); // 重新给 tick 赋值 (与上面同源, 都用单调钟)
@@ -237,6 +288,7 @@ static RunStatus run(void)
         sleep_ms((uint64_t)g_runtime_cfg.probe_interval_sec * 1000, false);
         return RUN_SUCCESS;
     case STATUS_NEED_AUTH: // 需要认证
+        line_control_set_state(LINE_STATE_PORTAL_REDIRECT, "网络探测收到门户重定向");
         retry_timeout = 1;
         if (g_runtime_cfg.session_invalid_wait_sec > 0)
         {
@@ -256,6 +308,10 @@ static RunStatus run(void)
             }
 
             const runtime_status_t* status = &g_prog_status[tl_thread_idx].runtime_status;
+            line_control_auth_failure(status->last_error_code, status->last_sub_error,
+                                      status->last_error_msg[0] ? status->last_error_msg : "认证响应失败");
+            if (status->line_state == LINE_STATE_RATE_LIMITED || status->line_state == LINE_STATE_FATAL)
+                return RUN_SUCCESS;
             const auth_error_kind_t kind = (auth_error_kind_t)status->last_error_kind;
             if (status->last_error_msg[0] != '\0')
             {
@@ -311,6 +367,7 @@ static RunStatus run(void)
         retry_auth = 1; // 认证成功: 下次失败重新从最短间隔开始
         return RUN_SUCCESS;
     case STATUS_ERROR: // 网络错误
+        line_control_set_state(LINE_STATE_PATH_ERROR, "线路探测失败");
         retry_auth = 1;
         if ((g_runtime_cfg.reconnect_line_error_max_attempts != 0 && retry_timeout > g_runtime_cfg.reconnect_line_error_max_attempts) ||
             !g_runtime_cfg.reconnect_enabled)
@@ -407,6 +464,7 @@ int dialer_app(void* arg)
      * 线程退出时的操作
      */
     watchdog_stop(); // 关闭流程里主循环不再打卡, 别把它当成卡死
+    if (g_stop_requested != 0) line_control_restore_on_shutdown();
     clean(); // 清除参数
     return exit_code;
 }

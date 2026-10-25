@@ -283,6 +283,7 @@ static account_state_t fill_account(const cJSON* account, const uint8_t cfg_no, 
     const cJSON* usr = cJSON_GetObjectItem(account, "username");
     const cJSON* pwd = cJSON_GetObjectItem(account, "password");
     const cJSON* chn = cJSON_GetObjectItem(account, "channel");
+    const cJSON* iface = cJSON_GetObjectItem(account, "iface");
 
     // 先把用户写过的东西按原样填进去: 配置不可用时网页要靠这块内存回显
     cfg->idx = cfg_no;
@@ -290,6 +291,24 @@ static account_state_t fill_account(const cJSON* account, const uint8_t cfg_no, 
     apply_channel_ua(cfg, cfg_no);
     snprintf(cfg->usr, USR_LEN, "%s", safe_str(usr != NULL ? usr->valuestring : ""));
     snprintf(cfg->pwd, PWD_LEN, "%s", safe_str(pwd != NULL ? pwd->valuestring : ""));
+    cfg->iface[0] = '\0';
+    if (iface != NULL)
+    {
+        bool valid_iface = cJSON_IsString(iface) && iface->valuestring != NULL &&
+                           strlen(iface->valuestring) < sizeof(cfg->iface);
+        if (valid_iface)
+        {
+            for (const unsigned char* p = (const unsigned char*)iface->valuestring; *p != '\0'; p++)
+            {
+                if (!( (*p >= 'a' && *p <= 'z') || (*p >= '0' && *p <= '9') ||
+                       *p == '_' || *p == '.' || *p == '-')) { valid_iface = false; break; }
+            }
+        }
+        if (valid_iface && iface->valuestring[0] != '\0')
+            snprintf(cfg->iface, sizeof(cfg->iface), "%s", iface->valuestring);
+        else if (!cJSON_IsString(iface) || (iface->valuestring != NULL && iface->valuestring[0] != '\0'))
+            LOG_WARN("配置 %" PRIu8 " iface 非法或设备名过长，将不执行线路控制", cfg_no);
+    }
     LOG_DEBUG("配置 %" PRIu8 " 使用 UA: %s", cfg_no, cfg->user_agent);
 
     if (usr == NULL || cJSON_IsString(usr) == false || usr->valuestring[0] == '\0')
