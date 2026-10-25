@@ -99,11 +99,11 @@ curl_socket_t open_socket_callback(void* client_p, curlsocktype purpose, struct 
         return CURL_SOCKET_BAD;
     }
 
-    LOG_VERBOSE("SO_MARK诊断 caller=%s tl_thread_idx=%d account_index=%d mark=0x%x socket=%d",
-             mark_ctx != NULL && mark_ctx->caller != NULL ? mark_ctx->caller : "unknown",
-             tl_thread_idx,
-             mark_ctx != NULL ? mark_ctx->account_index : -1,
-             mark_ctx != NULL ? mark_ctx->mark : 0, (int)sock_fd);
+    /**
+     * 每个 socket 都打一条会把日志打爆: 4 账号 × 4 探测目标 × 每 2 秒 ≈ 16 行/秒,
+     * 十分钟就能写出 6MB (实测 rotate 文件 6.3MB)。诊断已完成使命,
+     * 只在异常路径留记录。
+     */
     if (mark_ctx != NULL && mark_ctx->mark != 0)
     {
         if (setsockopt(sock_fd, SOL_SOCKET, SO_MARK, &mark_ctx->mark, sizeof(mark_ctx->mark)) == -1)
@@ -114,13 +114,7 @@ curl_socket_t open_socket_callback(void* client_p, curlsocktype purpose, struct 
             close(sock_fd);
             return CURL_SOCKET_BAD;
         }
-        else
-        {
-            LOG_VERBOSE("SO_MARK诊断成功 caller=%s account_index=%d mark=0x%x",
-                     mark_ctx->caller, mark_ctx->account_index, mark_ctx->mark);
-        }
     }
-    else LOG_VERBOSE("SO_MARK诊断跳过：调用方未提供有效账号 mark");
 
     return sock_fd;
 }
