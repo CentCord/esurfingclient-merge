@@ -314,7 +314,7 @@ WaitResult wait_need_auth(void)
             }
         }
 
-        const network_status_t net_state = check_network_status(true); // 检查网络状态
+        const network_status_t net_state = check_network_status(true, 0); // auth 进程仅加载一个账号
 
         // 状态真的变了才提示 (已联网 / 需要认证), 免得每 3 秒刷一条
         log_network_state_change(net_state);

@@ -41,6 +41,9 @@ bool select_auth_server(char* out, const size_t out_len)
 
     CURL* handles[AUTH_SERVER_COUNT];
     double connect_time[AUTH_SERVER_COUNT];
+#ifdef __OPENWRT__
+    socket_mark_context_t mark_contexts[AUTH_SERVER_COUNT];
+#endif
     size_t count = 0;
 
     for (size_t i = 0; i < AUTH_SERVER_COUNT; i++)
@@ -66,6 +69,12 @@ bool select_auth_server(char* out, const size_t out_len)
          * 是主线路视角下的结果; 多拨时本账号走另一条线, 未必一样快。
          */
         curl_easy_setopt(handle, CURLOPT_OPENSOCKETFUNCTION, open_socket_callback);
+        mark_contexts[count] = (socket_mark_context_t){
+            g_prog_status[tl_thread_idx].login_cfg.mark,
+            tl_thread_idx,
+            "DialerServer.select_auth_server"
+        };
+        curl_easy_setopt(handle, CURLOPT_OPENSOCKETDATA, &mark_contexts[count]);
 #endif
 
         if (curl_multi_add_handle(multi, handle) != CURLM_OK)

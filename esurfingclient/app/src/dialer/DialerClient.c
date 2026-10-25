@@ -137,7 +137,7 @@ static RunStatus run(void)
         return RUN_SUCCESS;
     }
 
-    const network_status_t net_state = check_network_status(true); // 检测网络状态
+    const network_status_t net_state = check_network_status(true, tl_thread_idx); // 显式传入账号索引
 
     // 状态真的变了才提示 (已联网 / 需要认证), 免得每秒刷一条
     log_network_state_change(net_state);

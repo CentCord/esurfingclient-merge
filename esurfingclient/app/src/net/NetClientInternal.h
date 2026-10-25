@@ -29,6 +29,12 @@ void log_curl_error(CURL* curl, CURLcode code, const char* errbuf, const char* u
 
 #ifdef __OPENWRT__
 curl_socket_t open_socket_callback(void* client_p, curlsocktype purpose, struct curl_sockaddr* addr);
+typedef struct
+{
+    uint32_t mark;
+    int account_index;
+    const char* caller;
+} socket_mark_context_t;
 #endif
 
 #endif

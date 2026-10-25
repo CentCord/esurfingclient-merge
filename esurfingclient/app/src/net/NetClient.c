@@ -93,6 +93,14 @@ static struct curl_slist* fixed_host_resolve(const fixed_host_t* host, const cha
 
 curl_resp_t post(const char* url, const char* data)
 {
+#ifdef __OPENWRT__
+    socket_mark_context_t mark_ctx = {0, -1, "NetClient.post"};
+    if (tl_thread_idx >= 0 && tl_thread_idx < g_prog_cnt)
+    {
+        mark_ctx.mark = g_prog_status[tl_thread_idx].login_cfg.mark;
+        mark_ctx.account_index = tl_thread_idx;
+    }
+#endif
     LOG_DEBUG("POST 地址: %s", url);
     LOG_DEBUG("POST 数据: %s", data);
 
@@ -175,6 +183,7 @@ curl_resp_t post(const char* url, const char* data)
 
 #ifdef __OPENWRT__
     curl_easy_setopt(curl, CURLOPT_OPENSOCKETFUNCTION, open_socket_callback);
+    curl_easy_setopt(curl, CURLOPT_OPENSOCKETDATA, &mark_ctx);
 #endif
 
     LOG_VERBOSE("执行 CURL");
@@ -239,6 +248,14 @@ void curl_resp_free(curl_resp_t* resp)
 
 curl_resp_t get(const char* url)
 {
+#ifdef __OPENWRT__
+    socket_mark_context_t mark_ctx = {0, -1, "NetClient.get"};
+    if (tl_thread_idx >= 0 && tl_thread_idx < g_prog_cnt)
+    {
+        mark_ctx.mark = g_prog_status[tl_thread_idx].login_cfg.mark;
+        mark_ctx.account_index = tl_thread_idx;
+    }
+#endif
     LOG_DEBUG("GET 地址: %s", url);
 
     curl_resp_t resp = {0};
@@ -309,6 +326,7 @@ curl_resp_t get(const char* url)
         curl_easy_setopt(curl, CURLOPT_MAXREDIRS, 10L);
     #ifdef __OPENWRT__
         curl_easy_setopt(curl, CURLOPT_OPENSOCKETFUNCTION, open_socket_callback);
+        curl_easy_setopt(curl, CURLOPT_OPENSOCKETDATA, &mark_ctx);
     #endif
     }
 

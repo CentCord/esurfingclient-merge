@@ -89,8 +89,8 @@ static void resolve_url(char* out, size_t out_len, const char* base, const char*
 #ifdef __OPENWRT__
 curl_socket_t open_socket_callback(void* client_p, curlsocktype purpose, struct curl_sockaddr* addr)
 {
-    (void)client_p;
     (void)purpose;
+    const socket_mark_context_t* mark_ctx = (const socket_mark_context_t*)client_p;
     curl_socket_t sock_fd = socket(addr->family, addr->socktype, addr->protocol);
     if (sock_fd == CURL_SOCKET_BAD)
     {
@@ -98,23 +98,25 @@ curl_socket_t open_socket_callback(void* client_p, curlsocktype purpose, struct 
         return CURL_SOCKET_BAD;
     }
 
-    /**
-     * 只有落在某个账号线程里 (tl_thread_idx >= 0) 才有 mark 可设
-     *
-     * Web 进程的后台探测线程没有账号上下文, tl_thread_idx 是 -1,
-     * 直接下标访问会越界读 g_prog_status[-1]。
-     */
-    if (tl_thread_idx >= 0 && g_prog_status[tl_thread_idx].login_cfg.mark != 0)
+    LOG_VERBOSE("SO_MARK诊断 caller=%s tl_thread_idx=%d account_index=%d mark=0x%x socket=%d",
+             mark_ctx != NULL && mark_ctx->caller != NULL ? mark_ctx->caller : "unknown",
+             tl_thread_idx,
+             mark_ctx != NULL ? mark_ctx->account_index : -1,
+             mark_ctx != NULL ? mark_ctx->mark : 0, (int)sock_fd);
+    if (mark_ctx != NULL && mark_ctx->mark != 0)
     {
-        if (setsockopt(sock_fd, SOL_SOCKET, SO_MARK, &g_prog_status[tl_thread_idx].login_cfg.mark, sizeof(g_prog_status[tl_thread_idx].login_cfg.mark)) == -1)
+        if (setsockopt(sock_fd, SOL_SOCKET, SO_MARK, &mark_ctx->mark, sizeof(mark_ctx->mark)) == -1)
         {
-            LOG_ERROR("设置 SO_MARK 失败 (mark = %" PRIu32 " (0x%x)): %s", g_prog_status[tl_thread_idx].login_cfg.mark, g_prog_status[tl_thread_idx].login_cfg.mark, strerror(errno));
+            LOG_ERROR("设置 SO_MARK 失败 caller=%s account_index=%d mark=%" PRIu32 " (0x%x): %s",
+                      mark_ctx->caller, mark_ctx->account_index, mark_ctx->mark, mark_ctx->mark, strerror(errno));
         }
         else
         {
-            LOG_VERBOSE("设置 SO_MARK = %" PRIu32 " (0x%x)", g_prog_status[tl_thread_idx].login_cfg.mark, g_prog_status[tl_thread_idx].login_cfg.mark);
+            LOG_VERBOSE("SO_MARK诊断成功 caller=%s account_index=%d mark=0x%x",
+                     mark_ctx->caller, mark_ctx->account_index, mark_ctx->mark);
         }
     }
+    else LOG_VERBOSE("SO_MARK诊断跳过：调用方未提供有效账号 mark");
 
     return sock_fd;
 }

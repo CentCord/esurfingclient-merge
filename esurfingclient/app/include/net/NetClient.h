@@ -34,7 +34,7 @@ void curl_resp_free(curl_resp_t* resp);
  * @param connect_only 仅作兼容保留, 当前实现统一发完整 GET 再看状态码
  * @return 网络状态
  */
-network_status_t check_network_status(bool connect_only);
+network_status_t check_network_status(bool connect_only, int account_index);
 
 /**
  * @brief 网络状态变化时提示一次 (相同状态不重复打印)

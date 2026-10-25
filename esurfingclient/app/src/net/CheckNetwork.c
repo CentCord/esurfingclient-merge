@@ -87,6 +87,9 @@ typedef struct
     struct curl_slist* resolve;
     const char* label;
     CURLcode code;
+#ifdef __OPENWRT__
+    socket_mark_context_t mark_ctx;
+#endif
 } probe_t;
 
 /**
@@ -125,7 +128,7 @@ static const known_host_t* known_host_for(const char* host)
  * @param ip 非空时用固定解析 (CURLOPT_RESOLVE); 为空表示地址本身是 IP, 直接请求
  */
 static bool probe_add(CURLM* multi, const char* url, const char* host, const char* ip,
-                      const char* label, probe_t* probes, size_t* count)
+                      const char* label, const int account_index, probe_t* probes, size_t* count)
 {
     if (*count >= PROBE_MAX) return false;
 
@@ -180,6 +183,11 @@ static bool probe_add(CURLM* multi, const char* url, const char* host, const cha
      * 挂上同一个回调后, 探测就跟认证请求走同一条线路。
      */
     curl_easy_setopt(handle, CURLOPT_OPENSOCKETFUNCTION, open_socket_callback);
+    probes[*count].mark_ctx.mark = (account_index >= 0 && account_index < g_prog_cnt)
+        ? g_prog_status[account_index].login_cfg.mark : 0;
+    probes[*count].mark_ctx.account_index = account_index;
+    probes[*count].mark_ctx.caller = "CheckNetwork.probe_add";
+    curl_easy_setopt(handle, CURLOPT_OPENSOCKETDATA, &probes[*count].mark_ctx);
 #endif
 
     if (curl_multi_add_handle(multi, handle) != CURLM_OK)
@@ -241,7 +249,7 @@ static void probe_report_failure(const probe_t* probes, const size_t count)
  *
  * @return STATUS_OK 拿到 204/301, STATUS_NEED_AUTH 拿到 302, 其余 STATUS_ERROR
  */
-static network_status_t probe_group(const probe_target_t* targets, const size_t count)
+static network_status_t probe_group(const probe_target_t* targets, const size_t count, const int account_index)
 {
     if (targets == NULL || count == 0) return STATUS_ERROR;
 
@@ -265,14 +273,14 @@ static network_status_t probe_group(const probe_target_t* targets, const size_t 
             for (size_t k = 0; k < KNOWN_IP_MAX && known->ips[k] != NULL && probe_count < PROBE_MAX; k++)
             {
                 snprintf(labels[probe_count], sizeof(labels[0]), "%s/ip%zu", targets[i].label, k + 1);
-                probe_add(multi, targets[i].url, host, known->ips[k], labels[probe_count], probes, &probe_count);
+                probe_add(multi, targets[i].url, host, known->ips[k], labels[probe_count], account_index, probes, &probe_count);
             }
         }
         else
         {
             // IP 字面量 (认证服务器): 直接请求, curl 不会去查 DNS
             snprintf(labels[probe_count], sizeof(labels[0]), "%s", targets[i].label);
-            probe_add(multi, targets[i].url, host, NULL, labels[probe_count], probes, &probe_count);
+            probe_add(multi, targets[i].url, host, NULL, labels[probe_count], account_index, probes, &probe_count);
         }
     }
 
@@ -335,7 +343,7 @@ static network_status_t probe_group(const probe_target_t* targets, const size_t 
     return result;
 }
 
-network_status_t check_network_status(const bool connect_only)
+network_status_t check_network_status(const bool connect_only, const int account_index)
 {
     /**
      * connect_only 只为兼容调用点保留: 探测统一发完整 GET 再看状态码 ——
@@ -353,14 +361,14 @@ network_status_t check_network_status(const bool connect_only)
     };
 
     const network_status_t status =
-        probe_group(internet_targets, sizeof(internet_targets) / sizeof(internet_targets[0]));
+        probe_group(internet_targets, sizeof(internet_targets) / sizeof(internet_targets[0]), account_index);
     if (status != STATUS_ERROR) return status;
 
     /**
      * 外网都不通: 再并发试认证服务器 —— 能连上 (返回 302 或其它状态码) 说明
      * 人还在校园网里, 只是没过认证。
      */
-    return probe_group(auth_targets, sizeof(auth_targets) / sizeof(auth_targets[0]));
+    return probe_group(auth_targets, sizeof(auth_targets) / sizeof(auth_targets[0]), account_index);
 }
 
 /**
@@ -414,7 +422,7 @@ static int probe_thread(void* arg)
     while (s_probe_running)
     {
         const uint64_t started = get_steady_tm_ms();
-        s_probe_cached = check_network_status(true);
+        s_probe_cached = check_network_status(true, -1);
         const uint64_t elapsed = get_steady_tm_ms() - started;
 
         /**
