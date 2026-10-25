@@ -1,0 +1,6 @@
+[2026-10-26 01:43:29] [auth#1 pid=89036] [main] [INFO] [LineControl.c:72] 线路状态账号=1 mark=0x0 iface=- UNKNOWN -> PORTAL_REDIRECT 原因=网络探测收到门户重定向
+[2026-10-26 01:43:29] [auth#1 pid=89036] [main] [INFO] [CheckNetwork.c:406] 需要认证
+[2026-10-26 01:43:29] [auth#1 pid=89036] [main] [INFO] [DialerServer.c:157] 选择认证服务器: 127.0.0.1:60569 (连接耗时 0 ms)
+[2026-10-26 01:43:29] [auth#1 pid=89036] [main] [INFO] [DialerAuth.c:193] 已认证登录
+[2026-10-26 01:43:34] [auth#1 pid=89036] [main] [INFO] [LineControl.c:72] 线路状态账号=1 mark=0x0 iface=- PORTAL_REDIRECT -> INTERNET_OK 原因=线路探测成功
+[2026-10-26 01:43:34] [auth#1 pid=89036] [main] [INFO] [LineControl.c:72] 线路状态账号=1 mark=0x0 iface=- INTERNET_OK -> KEEP_OK 原因=心跳成功

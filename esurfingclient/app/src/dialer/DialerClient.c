@@ -234,7 +234,9 @@ static RunStatus run(void)
     switch (net_state)
     {
     case STATUS_OK: // 正常联网
-        line_control_set_state(LINE_STATE_INTERNET_OK, "线路探测成功");
+        /* 204 只证明路径可达，不能覆盖最近一次成功心跳的会话状态。 */
+        if (g_prog_status[tl_thread_idx].runtime_status.line_state != LINE_STATE_KEEP_OK)
+            line_control_set_state(LINE_STATE_INTERNET_OK, "线路探测成功");
         retry_timeout = 1;
         retry_auth = 1;
         /**
