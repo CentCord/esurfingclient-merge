@@ -11,6 +11,7 @@
 #include <cJSON/cJSON.h>
 
 #include <inttypes.h>
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -556,6 +557,12 @@ bool load_cfg(void)
         const cJSON* account = cJSON_GetArrayItem(accounts, i);
         const cJSON* mark = cJSON_GetObjectItem(account, "mark");
 
+        if (mark != NULL && (!cJSON_IsString(mark) || mark->valuestring == NULL))
+        {
+            LOG_WARN("配置 %" PRIu8 " mark 必须是十六进制字符串，跳过该账号", i + 1);
+            continue;
+        }
+
         login_cfg_t* login = &g_prog_status[valid_i].login_cfg;
         const account_state_t state = fill_account(account, i + 1, login);
         if (state == ACCOUNT_SKIP) continue;
@@ -586,7 +593,17 @@ bool load_cfg(void)
             }
             if (mark->valuestring[0] != '\0')
             {
-                login->mark = strtoul(mark->valuestring, NULL, 16);
+                char* end = NULL;
+                errno = 0;
+                const unsigned long parsed = strtoul(mark->valuestring, &end, 16);
+                if (mark->valuestring[0] == '-' || errno == ERANGE ||
+                    end == mark->valuestring || *end != '\0' ||
+                    parsed == 0 || parsed > UINT32_MAX)
+                {
+                    LOG_WARN("配置 %" PRIu8 " mark 非法，跳过该账号", i + 1);
+                    continue;
+                }
+                login->mark = (uint32_t)parsed;
                 login->use_cus_mark = true;
                 use_cus_mark = true;
                 LOG_DEBUG("使用自定义标记值: %" PRIu32 " (0x%x)", login->mark, login->mark);
