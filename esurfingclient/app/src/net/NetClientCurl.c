@@ -18,6 +18,7 @@
 
 #ifdef __OPENWRT__
 #include <errno.h>
+#include <unistd.h>
 
 #ifndef SOL_SOCKET
 #define SOL_SOCKET 1
@@ -107,8 +108,11 @@ curl_socket_t open_socket_callback(void* client_p, curlsocktype purpose, struct 
     {
         if (setsockopt(sock_fd, SOL_SOCKET, SO_MARK, &mark_ctx->mark, sizeof(mark_ctx->mark)) == -1)
         {
+            const int mark_errno = errno;
             LOG_ERROR("设置 SO_MARK 失败 caller=%s account_index=%d mark=%" PRIu32 " (0x%x): %s",
-                      mark_ctx->caller, mark_ctx->account_index, mark_ctx->mark, mark_ctx->mark, strerror(errno));
+                      mark_ctx->caller, mark_ctx->account_index, mark_ctx->mark, mark_ctx->mark, strerror(mark_errno));
+            close(sock_fd);
+            return CURL_SOCKET_BAD;
         }
         else
         {
