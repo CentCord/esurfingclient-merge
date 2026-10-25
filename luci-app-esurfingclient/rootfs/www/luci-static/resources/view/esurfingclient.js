@@ -97,7 +97,16 @@ return view.extend({
                         click: function() {
                             self.enableTempDebug();
                         }
-                    }, '临时调试 30 分钟')
+                    }, '临时调试 30 分钟'),
+                    E('button', {
+                        class: 'cbi-button',
+                        style: 'margin-top: 6px; margin-left: 6px;',
+                        click: function() {
+                            self.saveConfig().then(function() {
+                                self.showNotification('已保存，运行中的进程约 5 秒内热切换日志等级', 'info');
+                            });
+                        }
+                    }, '热切换日志等级（不重启）')
                 ])
             ]),
             E('div', { class: 'cbi-value' }, [

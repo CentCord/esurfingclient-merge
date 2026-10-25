@@ -2,10 +2,17 @@
 
 #include "core/States.h"
 
+#include "config/Config.h"
+
 #include "utils/text/TextUtils.h"
 #include "utils/platform/PlatformUtils.h"
 
 #include "utils/time/TimeUtils.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/stat.h>
 
 log_level_t get_logger_level(void)
 {
@@ -109,4 +116,46 @@ void set_logger_console(const bool enabled)
 void set_logger_query_mode(const bool enabled)
 {
     g_query_mode = enabled;
+}
+
+/**
+ * 监听配置文件变化，热切换日志等级。
+ *
+ * 目的：调日志等级不该重启服务——重启会登出重登，正是我们要避免的操作。
+ * 只比对 mtime/size，变了才去读文件里那一个数字，不做整份配置解析。
+ */
+void log_level_watch(void)
+{
+    static time_t last_mtime = 0;
+    static long last_size = -1;
+
+    const char* path = get_config_path();
+    if (path == NULL || path[0] == '\0') return;
+
+    struct stat st;
+    if (stat(path, &st) != 0) return;
+    if (st.st_mtime == last_mtime && (long)st.st_size == last_size) return;
+    last_mtime = st.st_mtime;
+    last_size = (long)st.st_size;
+
+    FILE* file = fopen(path, "rb");
+    if (file == NULL) return;
+    char buf[8192];
+    const size_t n = fread(buf, 1, sizeof(buf) - 1, file);
+    fclose(file);
+    buf[n] = '\0';
+
+    const char* key = strstr(buf, "\"log_lv\"");
+    if (key == NULL) return;
+    const char* colon = strchr(key, ':');
+    if (colon == NULL) return;
+    const char* p = colon + 1;
+    while (*p == ' ' || *p == '\t') p++;
+    const int lv = atoi(p);
+    if (lv < (int)LOG_LEVEL_NONE || lv > (int)LOG_LEVEL_VERBOSE) return;
+    if ((log_level_t)lv != g_logger_cfg.lv)
+    {
+        set_logger_level((log_level_t)lv);
+        LOG_INFO("配置文件已变更，日志等级热切换为 [%s]", get_level_str((log_level_t)lv));
+    }
 }

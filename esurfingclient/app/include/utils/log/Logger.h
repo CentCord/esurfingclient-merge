@@ -98,6 +98,9 @@ void log_raw_line(const char* text);
  */
 log_level_t get_logger_level(void);
 
+/** 监听配置文件变化并在运行时切换日志等级（不重启服务） */
+void log_level_watch(void);
+
 /**
  * @brief 设置日志等级
  * @param lv 日志等级

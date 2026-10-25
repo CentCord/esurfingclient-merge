@@ -719,6 +719,9 @@ void work(void)
     uint64_t check_time = 0;
     while (g_thread_keep_alive && g_stop_requested == 0)
     {
+        /* 配置里的 log_lv 变了就热切换，不需要重启服务 */
+        log_level_watch();
+
         if (check_time > 299999)
         {
             check_time = 0;
