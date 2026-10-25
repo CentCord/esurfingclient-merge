@@ -1,0 +1,26 @@
+{
+  "scenario": "session_expire_after",
+  "duration_s": 600.0,
+  "interval_s": 5,
+  "samples": 121,
+  "sources": 85,
+  "rss_first_bytes": 32768,
+  "rss_last_bytes": 9322496,
+  "rss_min_bytes": 32768,
+  "rss_max_bytes": 9355264,
+  "rss_delta_bytes": 9289728,
+  "rss_steady_first_bytes": 9256960,
+  "rss_steady_last_bytes": 9322496,
+  "rss_steady_delta_bytes": 65536,
+  "events": {
+    "probe_302": 205,
+    "module": 100,
+    "ticket_issued": 100,
+    "auth_ok": 100,
+    "probe_204": 198,
+    "keep_ok": 99,
+    "session_expired": 99,
+    "keep_invalid": 99,
+    "term": 99
+  }
+}

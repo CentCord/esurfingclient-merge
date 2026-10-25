@@ -39,7 +39,7 @@ static const cfg_def_t s_cfg_defaults[] = {
     {"op_timeout",       CFG_DEF_NUM, false, DEFAULT_OP_TIMEOUT, NULL, "秒"},
     {"web_port",         CFG_DEF_NUM, false, DEFAULT_WEB_PORT, NULL, NULL},
     {"runtime",          CFG_DEF_OBJ, false, 0,
-     "{\"reconnect\":{\"enabled\":true,\"max_attempts\":0,\"line_error_max_attempts\":5,\"line_error_interval_sec\":10,\"backoff\":\"sequence\",\"intervals_sec\":[60,180,300,600,1200,1800],\"fixed_interval_sec\":300,\"base_sec\":60,\"multiplier\":2.0,\"max_sec\":1800,\"jitter_sec\":0},\"auth\":{\"connect_timeout_sec\":10,\"request_timeout_sec\":15,\"stagger_sec\":0,\"session_invalid_wait_sec\":0},\"keepalive\":{\"interval_mode\":\"server\",\"interval_sec\":300,\"min_interval_sec\":30,\"max_interval_sec\":1800,\"failure_retries\":5,\"retry_interval_sec\":1,\"retry_jitter_sec\":0},\"probe\":{\"interval_sec\":2,\"connect_timeout_ms\":3000,\"request_timeout_ms\":4000,\"line_error_tolerance\":1,\"portal_confirmations\":1},\"line_control\":{\"enabled\":true,\"down_on_session_invalid\":true,\"down_on_auth_failed\":false,\"restore_delay_sec\":30,\"restore_max_backoff_sec\":600},\"isolation\":{\"rate_limit_sec\":1800}}", NULL},
+     "{\"reconnect\":{\"enabled\":true,\"max_attempts\":0,\"line_error_max_attempts\":5,\"line_error_interval_sec\":10,\"backoff\":\"sequence\",\"intervals_sec\":[60,180,300,600,1200,1800],\"fixed_interval_sec\":300,\"base_sec\":60,\"multiplier\":2.0,\"max_sec\":1800,\"jitter_sec\":15},\"auth\":{\"connect_timeout_sec\":10,\"request_timeout_sec\":15,\"stagger_sec\":20,\"session_invalid_wait_sec\":0},\"keepalive\":{\"interval_mode\":\"server\",\"interval_sec\":300,\"min_interval_sec\":30,\"max_interval_sec\":1800,\"failure_retries\":5,\"retry_interval_sec\":3,\"retry_jitter_sec\":1},\"probe\":{\"interval_sec\":2,\"connect_timeout_ms\":3000,\"request_timeout_ms\":4000,\"line_error_tolerance\":3,\"portal_confirmations\":2},\"line_control\":{\"enabled\":true,\"down_on_session_invalid\":true,\"down_on_auth_failed\":false,\"restore_delay_sec\":30,\"restore_max_backoff_sec\":600},\"isolation\":{\"rate_limit_sec\":1800}}", NULL},
 };
 
 static uint8_t complete_object_from_template(cJSON* object, const cJSON* defaults, const char* prefix)
@@ -99,13 +99,16 @@ void runtime_config_defaults(runtime_config_t* cfg)
     cfg->keepalive_min_interval_sec = 30;
     cfg->keepalive_max_interval_sec = 1800;
     cfg->keepalive_failure_retries = 5;
-    cfg->keepalive_retry_interval_sec = 1;
+    cfg->keepalive_retry_interval_sec = 3;
+    cfg->keepalive_retry_jitter_sec = 1;
+    cfg->auth_stagger_sec = 20;
+    cfg->reconnect_jitter_sec = 15;
     cfg->probe_interval_sec = 2;
     cfg->probe_connect_timeout_ms = 3000;
     cfg->probe_request_timeout_ms = 4000;
     /* r7 每次探测直接采用结果，不做连续次数确认，缺省保持兼容。 */
-    cfg->probe_line_error_tolerance = 1;
-    cfg->probe_portal_confirmations = 1;
+    cfg->probe_line_error_tolerance = 3;
+    cfg->probe_portal_confirmations = 2;
     cfg->line_control_enabled = true;
     cfg->line_down_on_session_invalid = true;
     cfg->line_restore_delay_sec = 30;
@@ -235,8 +238,8 @@ void runtime_config_load(const cJSON* cfg_json, runtime_config_t* out)
         out->probe_connect_timeout_ms = 3000;
         out->probe_request_timeout_ms = 4000;
     }
-    out->probe_line_error_tolerance = runtime_uint(probe, "line_error_tolerance", 1, 1, 20);
-    out->probe_portal_confirmations = runtime_uint(probe, "portal_confirmations", 1, 1, 10);
+    out->probe_line_error_tolerance = runtime_uint(probe, "line_error_tolerance", 3, 1, 20);
+    out->probe_portal_confirmations = runtime_uint(probe, "portal_confirmations", 2, 1, 10);
 
     const cJSON* line = cJSON_GetObjectItem(root, "line_control");
     if (line != NULL && !cJSON_IsObject(line))

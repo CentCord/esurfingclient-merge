@@ -35,6 +35,9 @@ return view.extend({
             ),
             E('li', { class: 'cbi-tab-disabled', click: function() { self.switchTab('tab3'); } }, 
                 E('a', {}, '日志')
+            ),
+            E('li', { class: 'cbi-tab-disabled', click: function() { self.switchTab('tab4'); } },
+                E('a', {}, '运行时')
             )
         ]);
 
@@ -165,6 +168,12 @@ return view.extend({
 
         self.tableBody = self.renderTable();
 
+        /* 配置里没有 runtime 时，用默认值填充面板，让用户看到实际生效的数值 */
+        if (self.config.runtime === null || typeof self.config.runtime !== 'object')
+            self.config.runtime = self.runtimeDefaults();
+
+        self.runtime_panel = self.renderRuntimePanel();
+
         self.accounts_panel = E('div', { id: 'accounts_panel', style: 'display: none' }, [
             E('h3', { style: 'margin-top: 0;' }, '账号设置'),
             E('table', { class: 'table cbi-section-table' }, [
@@ -250,6 +259,7 @@ return view.extend({
                 tabBar,
                 self.basic_panel,
                 self.accounts_panel,
+                self.runtime_panel,
                 self.log_panel
             ])
         ];
@@ -359,6 +369,178 @@ return view.extend({
         var newBody = self.renderTable();
         self.tableBody.parentNode.replaceChild(newBody, self.tableBody);
         self.tableBody = newBody;
+    },
+
+    /* ---------------- 运行时参数面板 ---------------- */
+
+    /** 运行时参数的默认值（与 ConfigDefaults.c 保持一致） */
+    runtimeDefaults: function() {
+        return {
+            reconnect: {
+                enabled: true, max_attempts: 0, backoff: 'sequence',
+                intervals_sec: [60, 180, 300, 600, 1200, 1800],
+                fixed_interval_sec: 300, base_sec: 60, multiplier: 2.0,
+                max_sec: 1800, jitter_sec: 15,
+                line_error_max_attempts: 5, line_error_interval_sec: 10
+            },
+            auth: { connect_timeout_sec: 10, request_timeout_sec: 15, stagger_sec: 20, session_invalid_wait_sec: 0 },
+            keepalive: {
+                interval_mode: 'server', interval_sec: 300, min_interval_sec: 30, max_interval_sec: 1800,
+                failure_retries: 5, retry_interval_sec: 3, retry_jitter_sec: 1
+            },
+            probe: {
+                interval_sec: 2, connect_timeout_ms: 3000, request_timeout_ms: 4000,
+                line_error_tolerance: 3, portal_confirmations: 2
+            },
+            line_control: {
+                enabled: true, down_on_session_invalid: true, down_on_auth_failed: false,
+                restore_delay_sec: 30, restore_max_backoff_sec: 600
+            },
+            isolation: { rate_limit_sec: 1800 }
+        };
+    },
+
+    rtGet: function(path) {
+        var parts = path.split('.'), o = this.config, i;
+        for (i = 0; i < parts.length; i++) {
+            if (o === null || typeof o !== 'object') return undefined;
+            o = o[parts[i]];
+        }
+        return o;
+    },
+
+    rtSet: function(path, value) {
+        var parts = path.split('.'), o = this.config, i;
+        for (i = 0; i < parts.length - 1; i++) {
+            if (o[parts[i]] === null || typeof o[parts[i]] !== 'object') o[parts[i]] = {};
+            o = o[parts[i]];
+        }
+        o[parts[parts.length - 1]] = value;
+    },
+
+    rtNum: function(title, path, desc, step) {
+        var self = this, v = self.rtGet(path);
+        return E('div', { class: 'cbi-value' }, [
+            E('label', { class: 'cbi-value-title' }, title),
+            E('div', { class: 'cbi-value-field' }, [
+                E('input', {
+                    type: 'number', class: 'cbi-input-text', step: step || 1,
+                    value: (v === undefined || v === null) ? '' : v,
+                    change: function(ev) { self.rtSet(path, parseInt(ev.target.value, 10) || 0); }
+                }),
+                desc ? E('div', { class: 'cbi-value-description' }, desc) : ''
+            ])
+        ]);
+    },
+
+    rtBool: function(title, path, desc) {
+        var self = this, v = self.rtGet(path);
+        return E('div', { class: 'cbi-value' }, [
+            E('label', { class: 'cbi-value-title' }, title),
+            E('div', { class: 'cbi-value-field' }, [
+                E('input', {
+                    type: 'checkbox', checked: v ? true : undefined,
+                    change: function(ev) { self.rtSet(path, ev.target.checked); }
+                }),
+                desc ? E('div', { class: 'cbi-value-description' }, desc) : ''
+            ])
+        ]);
+    },
+
+    rtSelect: function(title, path, options, desc) {
+        var self = this, v = self.rtGet(path);
+        return E('div', { class: 'cbi-value' }, [
+            E('label', { class: 'cbi-value-title' }, title),
+            E('div', { class: 'cbi-value-field' }, [
+                E('select', { class: 'cbi-input-select', change: function(ev) { self.rtSet(path, ev.target.value); } },
+                    options.map(function(o) {
+                        return E('option', { value: o.value, selected: v === o.value ? true : undefined }, o.label);
+                    })),
+                desc ? E('div', { class: 'cbi-value-description' }, desc) : ''
+            ])
+        ]);
+    },
+
+    rtList: function(title, path, desc) {
+        var self = this, v = self.rtGet(path);
+        return E('div', { class: 'cbi-value' }, [
+            E('label', { class: 'cbi-value-title' }, title),
+            E('div', { class: 'cbi-value-field' }, [
+                E('input', {
+                    type: 'text', class: 'cbi-input-text',
+                    value: Array.isArray(v) ? v.join(',') : '',
+                    change: function(ev) {
+                        var arr = ev.target.value.split(',')
+                            .map(function(x) { return parseInt(x.trim(), 10); })
+                            .filter(function(n) { return n > 0; });
+                        self.rtSet(path, arr);
+                    }
+                }),
+                desc ? E('div', { class: 'cbi-value-description' }, desc) : ''
+            ])
+        ]);
+    },
+
+    renderRuntimePanel: function() {
+        var self = this;
+        return E('div', { id: 'runtime_panel', style: 'display: none' }, [
+            E('h3', { style: 'margin-top: 0;' }, '运行时参数'),
+            E('div', { class: 'cbi-value-description', style: 'margin-bottom: 10px' },
+                '这些参数作用于本机所有账号；留空或非法值会回退到默认值。'),
+
+            E('h4', {}, '认证'),
+            self.rtNum('首次认证错峰', 'runtime.auth.stagger_sec', '账号 N 延迟 (N-1)×该秒数后开始认证；默认 20 秒，避免同时登录触发限流'),
+            self.rtNum('会话失效后等待', 'runtime.auth.session_invalid_wait_sec', '秒；0 表示不额外等待'),
+            self.rtNum('连接超时', 'runtime.auth.connect_timeout_sec', '秒'),
+            self.rtNum('请求超时', 'runtime.auth.request_timeout_sec', '秒'),
+
+            E('h4', {}, '重连'),
+            self.rtBool('启用自动重连', 'runtime.reconnect.enabled', '关闭后认证失败只尝试一次，进入停止状态'),
+            self.rtSelect('退避策略', 'runtime.reconnect.backoff', [
+                { value: 'sequence', label: '自定义序列' },
+                { value: 'fixed', label: '固定间隔' },
+                { value: 'exponential', label: '指数退避' }
+            ]),
+            self.rtList('自定义序列', 'runtime.reconnect.intervals_sec', '逗号分隔的秒数，如 60,180,300,600,1200,1800'),
+            self.rtNum('固定间隔', 'runtime.reconnect.fixed_interval_sec', '秒；仅固定间隔策略使用'),
+            self.rtNum('初始间隔', 'runtime.reconnect.base_sec', '秒；仅指数退避使用'),
+            self.rtNum('退避倍数', 'runtime.reconnect.multiplier', '仅指数退避使用', 0.1),
+            self.rtNum('最大间隔', 'runtime.reconnect.max_sec', '秒'),
+            self.rtNum('随机抖动', 'runtime.reconnect.jitter_sec', '秒；每次重试额外随机等待，避免多账号同步；默认 15'),
+            self.rtNum('最大重试次数', 'runtime.reconnect.max_attempts', '0 表示不限'),
+            self.rtNum('线路错误重试上限', 'runtime.reconnect.line_error_max_attempts', '0 表示不限'),
+            self.rtNum('线路错误间隔', 'runtime.reconnect.line_error_interval_sec', '秒'),
+
+            E('h4', {}, '心跳'),
+            self.rtSelect('周期模式', 'runtime.keepalive.interval_mode', [
+                { value: 'server', label: '跟随服务端' },
+                { value: 'fixed', label: '固定周期' },
+                { value: 'clamped', label: '服务端值夹取' }
+            ]),
+            self.rtNum('固定周期', 'runtime.keepalive.interval_sec', '秒；仅固定周期使用'),
+            self.rtNum('周期下限', 'runtime.keepalive.min_interval_sec', '秒'),
+            self.rtNum('周期上限', 'runtime.keepalive.max_interval_sec', '秒'),
+            self.rtNum('失败重试次数', 'runtime.keepalive.failure_retries', '连续失败多少次判定会话失效'),
+            self.rtNum('重试间隔', 'runtime.keepalive.retry_interval_sec', '秒；默认 3，给网络抖动留窗口'),
+            self.rtNum('重试抖动', 'runtime.keepalive.retry_jitter_sec', '秒'),
+
+            E('h4', {}, '探测'),
+            self.rtNum('探测间隔', 'runtime.probe.interval_sec', '秒'),
+            self.rtNum('连接超时', 'runtime.probe.connect_timeout_ms', '毫秒'),
+            self.rtNum('请求超时', 'runtime.probe.request_timeout_ms', '毫秒'),
+            self.rtNum('连续失败容忍', 'runtime.probe.line_error_tolerance', '连续多少次失败才算线路故障；默认 3'),
+            self.rtNum('门户确认次数', 'runtime.probe.portal_confirmations', '连续多少次 302 才认定需要认证；默认 2'),
+
+            E('h4', {}, '线路控制'),
+            self.rtBool('启用线路控制', 'runtime.line_control.enabled', '需要给账号配置 iface 才会生效'),
+            self.rtBool('会话失效时下线', 'runtime.line_control.down_on_session_invalid', '把接口 down 掉，让 mwan3 自动摘线'),
+            self.rtBool('认证失败时下线', 'runtime.line_control.down_on_auth_failed'),
+            self.rtNum('恢复延迟', 'runtime.line_control.restore_delay_sec', '秒'),
+            self.rtNum('恢复退避上限', 'runtime.line_control.restore_max_backoff_sec', '秒'),
+
+            E('h4', {}, '隔离'),
+            self.rtNum('限流隔离时长', 'runtime.isolation.rate_limit_sec', '秒；被 11064000 限流后暂停该账号多久')
+        ]);
     },
 
     renderTable: function() {
@@ -756,54 +938,35 @@ return view.extend({
     switchTab: function(tabName) {
         var self = this;
 
-        var tabs = document.querySelectorAll('.cbi-tab, .cbi-tab-disabled');
+        var names = ['tab1', 'tab2', 'tab3', 'tab4'];
+        var panels = [self.basic_panel, self.accounts_panel, self.log_panel, self.runtime_panel];
+        var idx = names.indexOf(tabName);
+        if (idx < 0) idx = 0;
 
         self.stopLogAutoRefresh();
-        
-        if (tabName === 'tab1') {
-            self.currentTab = 'tab1';
-            tabs[0].classList.remove('cbi-tab-disabled');
-            tabs[0].classList.add('cbi-tab');
 
-            tabs[1].classList.remove('cbi-tab');
-            tabs[1].classList.add('cbi-tab-disabled');
-            tabs[2].classList.remove('cbi-tab');
-            tabs[2].classList.add('cbi-tab-disabled');
-            
-            self.basic_panel.style.display = 'block';
-            self.accounts_panel.style.display = 'none';
-            self.log_panel.style.display = 'none';
-        } else if (tabName === 'tab2') {
-            self.currentTab = 'tab2';
-            tabs[1].classList.remove('cbi-tab-disabled');
-            tabs[1].classList.add('cbi-tab');
+        var tabs = document.querySelectorAll('.cbi-tab, .cbi-tab-disabled');
+        for (var i = 0; i < tabs.length && i < names.length; i++) {
+            if (i === idx) {
+                tabs[i].classList.remove('cbi-tab-disabled');
+                tabs[i].classList.add('cbi-tab');
+            } else {
+                tabs[i].classList.remove('cbi-tab');
+                tabs[i].classList.add('cbi-tab-disabled');
+            }
+        }
 
-            tabs[0].classList.remove('cbi-tab');
-            tabs[0].classList.add('cbi-tab-disabled');
-            tabs[2].classList.remove('cbi-tab');
-            tabs[2].classList.add('cbi-tab-disabled');
+        for (var j = 0; j < panels.length; j++) {
+            if (panels[j]) panels[j].style.display = (j === idx) ? 'block' : 'none';
+        }
+        self.currentTab = names[idx];
 
-            self.basic_panel.style.display = 'none';
-            self.accounts_panel.style.display = 'block';
-            self.log_panel.style.display = 'none';
-        } else if (tabName === 'tab3') {
+        if (idx === 2) {
             var check = document.getElementById('log-autoscroll-check');
             if (check) check.checked = self.log_autoscroll;
             self.showNotification('正在读取日志', 'info');
-            self.currentTab = 'tab3';
             self.refreshLogs();
             self.startLogAutoRefresh();
-            tabs[2].classList.remove('cbi-tab-disabled');
-            tabs[2].classList.add('cbi-tab');
-
-            tabs[0].classList.remove('cbi-tab');
-            tabs[0].classList.add('cbi-tab-disabled');
-            tabs[1].classList.remove('cbi-tab');
-            tabs[1].classList.add('cbi-tab-disabled');
-
-            self.basic_panel.style.display = 'none';
-            self.accounts_panel.style.display = 'none';
-            self.log_panel.style.display = 'block';
         }
     },
 
