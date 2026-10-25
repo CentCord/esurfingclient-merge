@@ -69,7 +69,7 @@ bool query_is_authed(bool* out)
  * @param truncated 是否被截断
  * @return 是否读取成功
  */
-static bool read_log_file(const char* name, char** out, size_t* out_len, bool* truncated)
+static bool read_log_file(const char* name, size_t max_bytes, char** out, size_t* out_len, bool* truncated)
 {
     const char* dir = get_logger_dir();
     if (dir == NULL || dir[0] == '\0') return false;
@@ -88,9 +88,10 @@ static bool read_log_file(const char* name, char** out, size_t* out_len, bool* t
 
     size_t want = size;
     *truncated = false;
-    if (want > LOG_READ_MAX)
+    if (max_bytes == 0 || max_bytes > LOG_READ_MAX) max_bytes = LOG_READ_MAX;
+    if (want > max_bytes)
     {
-        want = LOG_READ_MAX;
+        want = max_bytes;
         *truncated = true;
         fseek(file, (long)(size - want), SEEK_SET);
     }
@@ -367,10 +368,24 @@ bool handle_api_get(struct mg_connection* c, struct mg_http_message* hm)
                 return true;
             }
 
+            /**
+             * tail=字节数: 只取文件尾部
+             *
+             * 调试级别的日志单个文件可能上 MB, 前端只想看最后一段时没必要全传。
+             * 不填则保持原来的 256KB 上限。
+             */
+            char tail_buf[16] = "";
+            size_t max_bytes = LOG_READ_MAX;
+            if (mg_http_get_var(&hm->query, "tail", tail_buf, sizeof(tail_buf)) > 0)
+            {
+                const long v = strtol(tail_buf, NULL, 10);
+                if (v > 0) max_bytes = (size_t)v;
+            }
+
             char* content = NULL;
             size_t content_len = 0;
             bool truncated = false;
-            if (read_log_file(file_name, &content, &content_len, &truncated) == false)
+            if (read_log_file(file_name, max_bytes, &content, &content_len, &truncated) == false)
             {
                 mg_http_reply(c, 404, HEADER_TEXT, "日志文件不存在或已被轮转\n");
                 return true;

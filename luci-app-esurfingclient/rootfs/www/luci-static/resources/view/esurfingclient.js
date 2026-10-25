@@ -43,7 +43,7 @@ return view.extend({
         self.config = self.config || {
             enabled: false,
             web_external_acc: false,
-            log_lv: 0,
+            log_lv: 4,
             log_dir: '/var/log/esurfing',
             conn_timeout: 3,
             op_timeout: 5,
@@ -87,7 +87,14 @@ return view.extend({
                         E('option', { value: 5, selected: self.config.log_lv === 5 ? true : undefined }, '5 - 调试'),
                         E('option', { value: 6, selected: self.config.log_lv === 6 ? true : undefined }, '6 - 全部')
                     ]),
-                    E('div', { class: 'cbi-value-description' }, '日志的详细程度')
+                    E('div', { class: 'cbi-value-description' }, '日志的详细程度: 3=警告, 4=信息, 5=调试, 6=全部'),
+                    E('button', {
+                        class: 'cbi-button cbi-button-action',
+                        style: 'margin-top: 6px;',
+                        click: function() {
+                            self.enableTempDebug();
+                        }
+                    }, '临时调试 30 分钟')
                 ])
             ]),
             E('div', { class: 'cbi-value' }, [
@@ -230,7 +237,7 @@ return view.extend({
             E('div', { style: 'margin-left: 25px;'}, [
                 E('p', { class: 'desc' }, '用于方便地调整 ESurfing 程序的配置文件'),
                 E('p', { class: 'desc' }, '账号密码与原电信认证程序的账号密码相同'),
-                E('p', { class: 'desc' }, 'LuCI 版本: 2.2.0-r6'),
+                E('p', { class: 'desc' }, 'LuCI 版本: 2.2.0-r7'),
                 E('p', { class: 'desc' }, '> Powered by BadGhost')
             ]),
             E('div', { class: 'cbi-section' }, [
@@ -294,6 +301,31 @@ return view.extend({
         var self = this;
 
         return fs.write('/etc/config/esurfingclient', JSON.stringify(self.config, null, 2));
+    },
+
+    /*
+     * 临时调试: 把日志级别调到 DEBUG(5), 并记一个到期时间。
+     * init 脚本启动时会检查 /tmp/esf_debug_until, 过期就自动降回 INFO(4),
+     * 免得忘记关掉把 tmpfs 写满。
+     */
+    enableTempDebug: function() {
+        var self = this;
+        var until = Math.floor(Date.now() / 1000) + 1800;
+
+        self.config.log_lv = 5;
+        return fs.write('/tmp/esf_debug_until', String(until))
+        .then(function() {
+            return self.saveConfig();
+        })
+        .then(function() {
+            return self.applyConfig();
+        })
+        .then(function() {
+            self.showNotification('已开启调试日志, 30 分钟后自动恢复', 'info');
+        })
+        .catch(function() {
+            self.showNotification('开启调试失败', 'error');
+        });
     },
 
     applyConfig: function() {
@@ -619,8 +651,27 @@ return view.extend({
             textarea.value = '请选择一个日志文件';
             return;
         }
-        fs.read_direct(self.logDirPath() + '/' + log_select.value)
+        var path = self.logDirPath() + '/' + log_select.value;
+
+        /*
+         * 先看大小再决定读不读。
+         *
+         * LuCI 的 fs.read_direct 会把整个文件读出来再经 rpcd 传过来，
+         * 日志开到调试级别时单个文件可能上 MB，直接读会让页面卡很久。
+         */
+        fs.stat(path).then(function(st) {
+            var size = (st && st.size) ? st.size : 0;
+            if (size > 1024 * 1024) {
+                textarea.value = '日志文件较大（' + (size / 1048576).toFixed(1) + ' MB），' +
+                    '为避免界面卡顿没有自动加载。\n\n' +
+                    '在路由器上查看尾部内容：\n  tail -c 262144 ' + path + '\n\n' +
+                    '或者把日志级别调低、清理旧日志后重试。';
+                return null;
+            }
+            return fs.read_direct(path);
+        })
         .then(function(data) {
+            if (data === null || typeof data === 'undefined') return;
             textarea.value = data || '暂无日志, 或客户端未启动';
             if (self.log_autoscroll) {
                 self.scrollLogToBottom();
@@ -658,17 +709,26 @@ return view.extend({
         var self = this;
 
         self.logs = self.logs || [];
-        var rows = self.logs.map(function(log, index) {
-            return E('option', { value: log, selected: self.logs[index] === log ? true : undefined }, log);
+        /*
+         * 默认选最新的那个文件。
+         *
+         * 服务每次停止都会把 run.log 归档成时间戳文件，再重启时 run.log 是空的；
+         * 固定选 run.log 会让日志页看起来"没有输出"，其实内容都在归档文件里。
+         */
+        var current = self.selected_log || self.logs[0] || 'run.log';
+        var rows = self.logs.map(function(log) {
+            return E('option', { value: log, selected: log === current ? true : undefined }, log);
         });
+        if (self.logs.indexOf(current) < 0) current = self.logs[0] || 'run.log';
 
         return E('select', {
             id: 'log_file',
             class: 'cbi-input-select',
             style: 'width: auto; min-width: 200px; max-width: 400px;',
-            value: 'run.log',
-            change: function() {
-                self.refreshLogs();
+            value: current,
+            change: function(ev) {
+                self.selected_log = ev.target.value;
+                self.loadLogContent();
             }
         }, rows);
     },
