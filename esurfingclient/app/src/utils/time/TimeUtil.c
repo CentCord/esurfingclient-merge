@@ -1,3 +1,4 @@
+#include "utils/log/Logger.h"
 #include "utils/time/TimeUtils.h"
 
 #include "core/States.h"
@@ -74,6 +75,7 @@ void sleep_ms(const uint64_t ms, const bool can_stop)
     if (can_stop)
     {
         uint64_t elapsed = 0;
+        uint64_t since_watch_ms = 0;
 
         while (elapsed < ms && g_thread_keep_alive && g_stop_requested == 0)
         {
@@ -93,6 +95,20 @@ void sleep_ms(const uint64_t ms, const bool can_stop)
             }
             const uint64_t SEGMENT_MS = 100;
             const uint64_t sleep_time = ms - elapsed < SEGMENT_MS ? ms - elapsed : SEGMENT_MS;
+
+            /**
+             * 每秒看一眼配置里的日志等级。
+             *
+             * 心跳周期是 5 分钟，账号在线时 run() 会睡这么久；只在循环顶部检查的话，
+             * 改日志等级要等好几分钟才生效（实测账号 3/4 没反应）。放在这里，
+             * 任何长睡眠都能在 1 秒内响应，代价是每秒一次 stat()。
+             */
+            since_watch_ms += sleep_time;
+            if (since_watch_ms >= 1000)
+            {
+                since_watch_ms = 0;
+                log_level_watch();
+            }
 
 #ifdef _WIN32
             Sleep(sleep_time);
