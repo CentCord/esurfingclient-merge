@@ -72,8 +72,12 @@ uint8_t parse_channel_json(const cJSON* chn, const uint8_t cfg_no)
 
     if (cJSON_IsNumber(chn))
     {
-        const uint8_t value = (uint8_t)chn->valueint;
-        if (channel_find(value) != NULL) return value;
+        if (chn->valueint >= 0 && chn->valueint <= UINT8_MAX &&
+            chn->valuedouble == (double)chn->valueint)
+        {
+            const uint8_t value = (uint8_t)chn->valueint;
+            if (channel_find(value) != NULL) return value;
+        }
 
         LOG_WARN("配置 %" PRIu8 " channel 参数错误, 使用默认通道 3 (Android)", cfg_no);
         return 3;
