@@ -29,12 +29,6 @@
  * 地址被网关/防火墙静默丢弃 (SYN 发出去没有回应), 一次检测就要白等十几到几十秒。
  * 这类超时与服务器响应快慢无关, 调大超时只会等更久 —— 所以这里固定用短超时。
  */
-#define PROBE_CONNECT_TIMEOUT_MS 3000L
-#define PROBE_TOTAL_TIMEOUT_MS 4000L
-
-/** 后台探测的间隔 (仅 Web 进程用) */
-#define PROBE_INTERVAL_MS 2000
-
 /** 失败汇总的最小间隔: 探测 2 秒一轮, 网络长时间不通时不能把日志刷满 */
 #define PROBE_FAIL_REPORT_MS 30000
 
@@ -138,8 +132,8 @@ static bool probe_add(CURLM* multi, const char* url, const char* host, const cha
     struct curl_slist* resolve = NULL;
 
     curl_easy_setopt(handle, CURLOPT_URL, url);
-    curl_easy_setopt(handle, CURLOPT_CONNECTTIMEOUT_MS, PROBE_CONNECT_TIMEOUT_MS);
-    curl_easy_setopt(handle, CURLOPT_TIMEOUT_MS, PROBE_TOTAL_TIMEOUT_MS);
+    curl_easy_setopt(handle, CURLOPT_CONNECTTIMEOUT_MS, (long)g_runtime_cfg.probe_connect_timeout_ms);
+    curl_easy_setopt(handle, CURLOPT_TIMEOUT_MS, (long)g_runtime_cfg.probe_request_timeout_ms);
     curl_easy_setopt(handle, CURLOPT_FOLLOWLOCATION, 0L);
     curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, probe_sink);
     curl_easy_setopt(handle, CURLOPT_NOSIGNAL, 1L);
@@ -286,7 +280,7 @@ static network_status_t probe_group(const probe_target_t* targets, const size_t 
 
     if (probe_count > 0)
     {
-        const uint64_t deadline = get_steady_tm_ms() + PROBE_TOTAL_TIMEOUT_MS + 1000;
+        const uint64_t deadline = get_steady_tm_ms() + g_runtime_cfg.probe_request_timeout_ms + 1000;
         int running = 0;
 
         curl_multi_perform(multi, &running);
@@ -360,15 +354,28 @@ network_status_t check_network_status(const bool connect_only, const int account
         {AUTH_BAK_URL, "auth2"},
     };
 
-    const network_status_t status =
+    network_status_t status =
         probe_group(internet_targets, sizeof(internet_targets) / sizeof(internet_targets[0]), account_index);
-    if (status != STATUS_ERROR) return status;
+    if (status == STATUS_ERROR)
+        status = probe_group(auth_targets, sizeof(auth_targets) / sizeof(auth_targets[0]), account_index);
 
-    /**
-     * 外网都不通: 再并发试认证服务器 —— 能连上 (返回 302 或其它状态码) 说明
-     * 人还在校园网里, 只是没过认证。
-     */
-    return probe_group(auth_targets, sizeof(auth_targets) / sizeof(auth_targets[0]), account_index);
+    static uint32_t line_errors[256];
+    static uint32_t portal_hits[256];
+    const unsigned slot = (account_index >= 0 && account_index < 255) ? (unsigned)account_index : 255U;
+    if (status == STATUS_ERROR)
+    {
+        portal_hits[slot] = 0;
+        if (++line_errors[slot] < g_runtime_cfg.probe_line_error_tolerance) return STATUS_PENDING;
+        return status;
+    }
+    line_errors[slot] = 0;
+    if (status == STATUS_NEED_AUTH)
+    {
+        if (++portal_hits[slot] < g_runtime_cfg.probe_portal_confirmations) return STATUS_PENDING;
+    }
+    else portal_hits[slot] = 0;
+    return status;
+
 }
 
 /**
@@ -435,7 +442,8 @@ static int probe_thread(void* arg)
                      elapsed, (int)s_probe_cached);
         }
 
-        for (int i = 0; i < PROBE_INTERVAL_MS / 100; i++)
+        const uint64_t wait_ms = (uint64_t)g_runtime_cfg.probe_interval_sec * 1000;
+        for (uint64_t i = 0; i < wait_ms / 100; i++)
         {
             if (s_probe_running == false) return 0;
             sleep_ms(100, false);
@@ -458,7 +466,7 @@ void net_probe_start(void)
         return;
     }
 
-    LOG_DEBUG("联网状态探测已启动 (后台, %d 毫秒一轮)", PROBE_INTERVAL_MS);
+    LOG_DEBUG("联网状态探测已启动 (后台, %u 秒一轮)", g_runtime_cfg.probe_interval_sec);
 }
 
 void net_probe_stop(void)

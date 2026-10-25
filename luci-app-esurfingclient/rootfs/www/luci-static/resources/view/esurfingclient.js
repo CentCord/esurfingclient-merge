@@ -109,6 +109,9 @@ return view.extend({
                         value: self.config.conn_timeout,
                         change: function(ev) {
                             self.config.conn_timeout = self.normalizeTimeout(ev.target.value, 3);
+                            self.config.runtime = self.config.runtime || {};
+                            self.config.runtime.auth = self.config.runtime.auth || {};
+                            self.config.runtime.auth.connect_timeout_sec = self.config.conn_timeout;
                             ev.target.value = self.config.conn_timeout;
                         }
                     }),
@@ -127,6 +130,9 @@ return view.extend({
                         value: self.config.op_timeout,
                         change: function(ev) {
                             self.config.op_timeout = self.normalizeTimeout(ev.target.value, 5);
+                            self.config.runtime = self.config.runtime || {};
+                            self.config.runtime.auth = self.config.runtime.auth || {};
+                            self.config.runtime.auth.request_timeout_sec = self.config.op_timeout;
                             ev.target.value = self.config.op_timeout;
                         }
                     }),
@@ -270,6 +276,11 @@ return view.extend({
                 // 旧配置文件可能缺少超时参数, 这里补齐默认值, 避免输入框显示空值
                 self.config.conn_timeout = self.normalizeTimeout(self.config.conn_timeout, 3);
                 self.config.op_timeout = self.normalizeTimeout(self.config.op_timeout, 5);
+                var runtimeAuth = self.config.runtime && self.config.runtime.auth;
+                if (runtimeAuth) {
+                    self.config.conn_timeout = self.normalizeTimeout(runtimeAuth.connect_timeout_sec, self.config.conn_timeout);
+                    self.config.op_timeout = self.normalizeTimeout(runtimeAuth.request_timeout_sec, self.config.op_timeout);
+                }
                 self.showNotification('读取配置文件成功', 'success');
                 return self.config;
             })

@@ -393,7 +393,21 @@ bool load_cfg(void)
      * 放在这里是为了后面每一处解析都能拿到完整的对象; 补全后的内容要写回文件,
      * 用户下次打开配置就能看见自己漏了什么 (写不回去也不影响本次运行, 值已经在内存里)
      */
+    const bool runtime_was_missing = cJSON_GetObjectItem(cfg_json, "runtime") == NULL;
+    const long legacy_conn_timeout = cfg_read_num(cfg_json, "conn_timeout", DEFAULT_CONN_TIMEOUT);
+    const long legacy_op_timeout = cfg_read_num(cfg_json, "op_timeout", DEFAULT_OP_TIMEOUT);
     const uint8_t completed = complete_cfg(cfg_json);
+    /* 首次迁移旧配置时，把已有超时值迁移到 runtime，避免默认补全覆盖用户配置。 */
+    if (runtime_was_missing)
+    {
+        cJSON* runtime = (cJSON*)cJSON_GetObjectItem(cfg_json, "runtime");
+        cJSON* auth = runtime != NULL ? (cJSON*)cJSON_GetObjectItem(runtime, "auth") : NULL;
+        if (auth != NULL)
+        {
+            cJSON_ReplaceItemInObject(auth, "connect_timeout_sec", cJSON_CreateNumber(legacy_conn_timeout));
+            cJSON_ReplaceItemInObject(auth, "request_timeout_sec", cJSON_CreateNumber(legacy_op_timeout));
+        }
+    }
     if (completed > 0)
     {
         LOG_INFO("配置文件缺少参数, 已按默认值补全 %" PRIu8 " 个", completed);
@@ -474,8 +488,9 @@ bool load_cfg(void)
         set_logger_dir(log_dir);
     }
 
-    g_conn_timeout = cfg_read_num(cfg_json, "conn_timeout", DEFAULT_CONN_TIMEOUT);
-    g_op_timeout = cfg_read_num(cfg_json, "op_timeout", DEFAULT_OP_TIMEOUT);
+    runtime_config_load(cfg_json, &g_runtime_cfg);
+    g_conn_timeout = (long)g_runtime_cfg.auth_connect_timeout_sec;
+    g_op_timeout = (long)g_runtime_cfg.auth_request_timeout_sec;
 
     const cJSON* accounts = cJSON_GetObjectItem(cfg_json, "accounts");
 

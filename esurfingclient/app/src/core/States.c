@@ -80,3 +80,5 @@ bool g_waiting_cfg = false;
 long g_conn_timeout = DEFAULT_CONN_TIMEOUT;
 
 long g_op_timeout = DEFAULT_OP_TIMEOUT;
+
+runtime_config_t g_runtime_cfg;

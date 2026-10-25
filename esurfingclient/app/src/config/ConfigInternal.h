@@ -15,4 +15,7 @@ bool apply_time_windows(const cJSON* item, login_cfg_t* cfg);
 
 uint8_t complete_cfg(cJSON* cfg_json);
 
+void runtime_config_defaults(runtime_config_t* cfg);
+void runtime_config_load(const cJSON* cfg_json, runtime_config_t* out);
+
 #endif

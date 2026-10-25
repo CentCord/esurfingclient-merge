@@ -15,6 +15,7 @@
 #include "utils/runtime/Shutdown.h"
 #include "utils/runtime/Watchdog.h"
 #include "utils/log/Logger.h"
+#include "utils/text/TextUtils.h"
 #include "utils/sim/SimThread.h"
 
 #ifdef _WIN32
@@ -46,7 +47,38 @@ typedef enum
  * 网络/服务端临时故障按这张表走, 用完之后固定用最后一档 (30 分钟), 一直重试;
  * 需要人工处理的错误不走这张表, 直接等到重启或退出
  */
-static const uint64_t table[] = {1, 3, 5, 10, 20, 30};
+static uint32_t retry_jitter(const uint32_t max_sec)
+{
+    if (max_sec == 0) return 0;
+    uint32_t value = 0;
+    get_rand_bytes((uint8_t*)&value, sizeof(value));
+    return value % (max_sec + 1);
+}
+
+static uint64_t retry_delay_sec(const uint32_t attempt, const bool slow)
+{
+    const runtime_config_t* cfg = &g_runtime_cfg;
+    uint64_t delay = cfg->reconnect_max_sec;
+    if (slow) delay = cfg->reconnect_max_sec;
+    else if (cfg->reconnect_backoff == RETRY_FIXED) delay = cfg->reconnect_fixed_interval_sec;
+    else if (cfg->reconnect_backoff == RETRY_EXPONENTIAL)
+    {
+        delay = cfg->reconnect_base_sec;
+        for (uint32_t i = 1; i < attempt && delay < cfg->reconnect_max_sec; i++)
+        {
+            const double next = delay * cfg->reconnect_multiplier;
+            delay = next > cfg->reconnect_max_sec ? cfg->reconnect_max_sec : (uint64_t)next;
+        }
+    }
+    else
+    {
+        const uint32_t pos = attempt > 0 ? attempt - 1 : 0;
+        const uint32_t idx = pos < cfg->reconnect_interval_count ? pos : (uint32_t)(cfg->reconnect_interval_count - 1);
+        delay = cfg->reconnect_intervals_sec[idx];
+    }
+    if (delay > cfg->reconnect_max_sec) delay = cfg->reconnect_max_sec;
+    return delay + retry_jitter(cfg->reconnect_jitter_sec);
+}
 
 /**
  * @brief 各角色入口的公共起步动作
@@ -101,10 +133,10 @@ bool app_bootstrap(void)
  * @param wait_minutes 等多少分钟; 0 表示一直等到重启或退出
  * @return true 正常等完 (可继续重试), false 被打断
  */
-static bool wait_auth_retry(const uint64_t wait_minutes)
+static bool wait_auth_retry(const uint64_t wait_seconds)
 {
     const uint64_t segment_ms = 5000; // 每 5 秒复核一次标志
-    const uint64_t total_ms = wait_minutes * 60000ULL;
+    const uint64_t total_ms = wait_seconds * 1000ULL;
     uint64_t waited_ms = 0;
 
     while (true)
@@ -112,10 +144,10 @@ static bool wait_auth_retry(const uint64_t wait_minutes)
         if (g_thread_keep_alive == false || g_stop_requested != 0) return false;
         if (g_prog_status[tl_thread_idx].runtime_status.is_running == false) return false;
         if (g_prog_status[tl_thread_idx].runtime_status.is_need_reauth) return false;
-        if (wait_minutes != 0 && waited_ms >= total_ms) return true;
+        if (wait_seconds != 0 && waited_ms >= total_ms) return true;
 
         uint64_t step = segment_ms;
-        if (wait_minutes != 0 && total_ms - waited_ms < step) step = total_ms - waited_ms;
+        if (wait_seconds != 0 && total_ms - waited_ms < step) step = total_ms - waited_ms;
         sleep_ms(step, true);
         waited_ms += step;
     }
@@ -123,8 +155,14 @@ static bool wait_auth_retry(const uint64_t wait_minutes)
 
 static RunStatus run(void)
 {
-    static uint8_t retry_timeout = 1;
-    static uint8_t retry_auth = 1;
+    static uint32_t retry_timeout = 1;
+    static uint32_t retry_auth = 1;
+
+    if (g_prog_status[tl_thread_idx].runtime_status.is_retry_paused)
+    {
+        sleep_ms(1000, false);
+        return RUN_SUCCESS;
+    }
 
     // 时间控制/重置请求优先于一切网络操作:
     // 到点下线后不应再发送心跳包，也不应继续认证或重试
@@ -164,20 +202,27 @@ static RunStatus run(void)
                  */
                 if (get_steady_tm_ms() - g_prog_status[tl_thread_idx].auth_cfg.tick >= g_prog_status[tl_thread_idx].auth_cfg.keep_retry * 1000)
                 {
-                    uint8_t retry_heartbeat = 1;
+                    uint32_t heartbeat_retries = 0;
                     while (heartbeat() == false)
                     {
-                        if (retry_heartbeat > 5)
+                        if (heartbeat_retries >= g_runtime_cfg.keepalive_failure_retries)
                         {
                             LOG_ERROR("超过最多重试次数");
+                            if (!g_runtime_cfg.reconnect_enabled)
+                            {
+                                g_prog_status[tl_thread_idx].runtime_status.is_retry_paused = true;
+                                LOG_WARN("自动重连已关闭，认证实例保持停止状态；重启服务可手动重试");
+                                return RUN_SUCCESS;
+                            }
                             return RUN_FAILED;
                         }
                         LOG_WARN("配置 %" PRIu8 " 心跳包发送失败, 下标 %" PRIu8 ", 重试: 第 %" PRIu8 " 次, 最多 5 次",
                             g_prog_status[tl_thread_idx].login_cfg.idx,
                             tl_thread_idx,
-                            retry_heartbeat);
-                        retry_heartbeat++;
-                        sleep_ms(1000, true);
+                            (uint8_t)(heartbeat_retries + 1));
+                        heartbeat_retries++;
+                        const uint32_t jitter = retry_jitter(g_runtime_cfg.keepalive_retry_jitter_sec);
+                        sleep_ms((uint64_t)(g_runtime_cfg.keepalive_retry_interval_sec + jitter) * 1000, true);
                     }
                     LOG_DEBUG("下一次发送心跳包: %" PRIu64 " 秒后",
                         g_prog_status[tl_thread_idx].auth_cfg.keep_retry);
@@ -188,8 +233,16 @@ static RunStatus run(void)
         // 未认证时不再重复打日志: log_network_state_change 已在状态变化时提示过一次
         sleep_ms(1000, false);
         return RUN_SUCCESS;
+    case STATUS_PENDING:
+        sleep_ms((uint64_t)g_runtime_cfg.probe_interval_sec * 1000, false);
+        return RUN_SUCCESS;
     case STATUS_NEED_AUTH: // 需要认证
         retry_timeout = 1;
+        if (g_runtime_cfg.session_invalid_wait_sec > 0)
+        {
+            LOG_INFO("认证前等待配置的最小间隔 %u 秒", g_runtime_cfg.session_invalid_wait_sec);
+            sleep_ms((uint64_t)g_runtime_cfg.session_invalid_wait_sec * 1000, true);
+        }
         if (g_prog_status[tl_thread_idx].runtime_status.is_initialized) // 进入认证流程的时候如果会话已经初始化, 重置认证配置参数
         {
             reset();
@@ -219,7 +272,13 @@ static RunStatus run(void)
                     g_prog_status[tl_thread_idx].login_cfg.idx);
             }
 
-            uint64_t wait_minutes = 0;
+            uint64_t wait_seconds = 0;
+            if (!g_runtime_cfg.reconnect_enabled)
+            {
+                g_prog_status[tl_thread_idx].runtime_status.is_retry_paused = true;
+                LOG_WARN("自动重连已关闭，认证实例保持停止状态；重启服务可手动重试");
+                return RUN_SUCCESS;
+            }
             if (kind == AUTH_ERROR_FATAL)
             {
                 /**
@@ -231,17 +290,19 @@ static RunStatus run(void)
             }
             else
             {
-                const size_t table_len = sizeof(table) / sizeof(table[0]);
-                const size_t step = (kind == AUTH_ERROR_SLOW)
-                                        ? table_len
-                                        : (retry_auth <= table_len ? retry_auth : table_len);
-                wait_minutes = table[step - 1];
-                LOG_WARN("配置 %" PRIu8 " 将在 %" PRIu64 " 分钟后重试 (第 %" PRIu8 " 次失败, 不设上限, 重启或退出可立即打断)",
-                    g_prog_status[tl_thread_idx].login_cfg.idx, wait_minutes, retry_auth);
-                if (retry_auth < UINT8_MAX) retry_auth++;
+                if (g_runtime_cfg.reconnect_max_attempts != 0 && retry_auth > g_runtime_cfg.reconnect_max_attempts)
+                {
+                    g_prog_status[tl_thread_idx].runtime_status.is_retry_paused = true;
+                    LOG_WARN("认证重试达到 max_attempts=%u，实例保持停止状态", g_runtime_cfg.reconnect_max_attempts);
+                    return RUN_SUCCESS;
+                }
+                wait_seconds = retry_delay_sec(retry_auth, kind == AUTH_ERROR_SLOW);
+                LOG_WARN("配置 %" PRIu8 " 将在 %" PRIu64 " 秒后重试 (第 %" PRIu32 " 次失败)",
+                    g_prog_status[tl_thread_idx].login_cfg.idx, wait_seconds, retry_auth);
+                if (retry_auth < UINT32_MAX) retry_auth++;
             }
 
-            if (wait_auth_retry(wait_minutes) == false)
+            if (wait_auth_retry(wait_seconds) == false)
             {
                 LOG_DEBUG("等待被重启/退出请求打断, 本轮认证结束");
             }
@@ -251,15 +312,23 @@ static RunStatus run(void)
         return RUN_SUCCESS;
     case STATUS_ERROR: // 网络错误
         retry_auth = 1;
-        if (retry_timeout > 5)
+        if ((g_runtime_cfg.reconnect_line_error_max_attempts != 0 && retry_timeout > g_runtime_cfg.reconnect_line_error_max_attempts) ||
+            !g_runtime_cfg.reconnect_enabled)
         {
+            if (!g_runtime_cfg.reconnect_enabled)
+            {
+                g_prog_status[tl_thread_idx].runtime_status.is_retry_paused = true;
+                LOG_WARN("自动重连已关闭，网络恢复后重启服务可再次尝试");
+                return RUN_SUCCESS;
+            }
             LOG_ERROR("超过最多重试次数");
             return RUN_FAILED;
         }
-        LOG_WARN("网络错误, 等待 10 秒后重试, 重试: 第 %" PRIu8 " 次, 最多 5 次",
-            retry_timeout);
-        sleep_ms(10000, true);
-        retry_timeout++;
+        const uint32_t line_jitter = retry_jitter(g_runtime_cfg.reconnect_jitter_sec);
+        LOG_WARN("网络错误, 等待 %u 秒后重试, 重试: 第 %" PRIu32 " 次",
+            g_runtime_cfg.reconnect_line_error_interval_sec + line_jitter, retry_timeout);
+        sleep_ms((uint64_t)(g_runtime_cfg.reconnect_line_error_interval_sec + line_jitter) * 1000, true);
+        if (retry_timeout < UINT32_MAX) retry_timeout++;
         return TIMEOUT_RETRY;
     default:
         retry_timeout = 1;

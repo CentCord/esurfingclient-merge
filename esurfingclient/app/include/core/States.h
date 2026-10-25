@@ -49,6 +49,41 @@
 
 #define DEFAULT_WEB_EXTERNAL_ACC false
 
+typedef enum { RETRY_FIXED = 0, RETRY_EXPONENTIAL, RETRY_SEQUENCE } retry_backoff_t;
+typedef enum { KEEP_INTERVAL_SERVER = 0, KEEP_INTERVAL_FIXED, KEEP_INTERVAL_CLAMPED } keep_interval_mode_t;
+
+typedef struct
+{
+    bool reconnect_enabled;
+    uint32_t reconnect_max_attempts;
+    uint32_t reconnect_line_error_max_attempts;
+    uint32_t reconnect_line_error_interval_sec;
+    retry_backoff_t reconnect_backoff;
+    uint32_t reconnect_intervals_sec[32];
+    uint8_t reconnect_interval_count;
+    uint32_t reconnect_fixed_interval_sec;
+    uint32_t reconnect_base_sec;
+    double reconnect_multiplier;
+    uint32_t reconnect_max_sec;
+    uint32_t reconnect_jitter_sec;
+    uint32_t auth_connect_timeout_sec;
+    uint32_t auth_request_timeout_sec;
+    uint32_t auth_stagger_sec;
+    uint32_t session_invalid_wait_sec;
+    keep_interval_mode_t keepalive_interval_mode;
+    uint32_t keepalive_interval_sec;
+    uint32_t keepalive_min_interval_sec;
+    uint32_t keepalive_max_interval_sec;
+    uint32_t keepalive_failure_retries;
+    uint32_t keepalive_retry_interval_sec;
+    uint32_t keepalive_retry_jitter_sec;
+    uint32_t probe_interval_sec;
+    uint32_t probe_connect_timeout_ms;
+    uint32_t probe_request_timeout_ms;
+    uint32_t probe_line_error_tolerance;
+    uint32_t probe_portal_confirmations;
+} runtime_config_t;
+
 typedef enum
 {
     GET_TICKET = 1,
@@ -130,6 +165,7 @@ typedef struct
     bool is_authed;
     bool is_need_reauth;
     bool is_time_disabled;
+    bool is_retry_paused;
     /** 上次认证失败时服务端返回的码与翻译, 供日志与网页显示使用 */
     uint8_t last_error_kind;
     uint64_t last_error_at;
@@ -225,6 +261,8 @@ extern bool g_waiting_cfg;
 extern long g_conn_timeout;
 
 extern long g_op_timeout;
+
+extern runtime_config_t g_runtime_cfg;
 
 /** @brief 刷新状态函数 */
 void refresh_states(void);

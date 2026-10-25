@@ -75,7 +75,7 @@ flowchart LR
 
 ## 5. 阶段 1 缺陷定位记录
 
-根因是 `open_socket_callback()` 在 `NetClientCurl.c` 通过 `tl_thread_idx` 访问 mark，且只有 `tl_thread_idx >= 0` 时才调用 `setsockopt()`。认证进程的 `work_auth()` 在 `wait_need_auth()` 阶段直接探测网络；此时尚未进入 `dialer_app()` 设置账号 TLS 索引的代码，故该线程索引为初始 `-1`。curl callback 因而被调用但保护条件跳过 `SO_MARK`；“日志 0 次”来自成功日志只在该分支内，现新增的临时 WARN 诊断将直接打印 `caller/account_index/mark`，可区分“没走 callback”“收到 -1/0”“setsockopt 失败”“成功”。
+根因是 `open_socket_callback()` 在 `NetClientCurl.c` 通过 `tl_thread_idx` 访问 mark，且只有 `tl_thread_idx >= 0` 时才调用 `setsockopt()`。认证进程的 `work_auth()` 在 `wait_need_auth()` 阶段直接探测网络；此时尚未进入 `dialer_app()` 设置账号 TLS 索引的代码，故该线程索引为初始 `-1`。curl callback 因而被调用但保护条件跳过 `SO_MARK`；“日志 0 次”来自成功日志只在该分支内，现新增的临时 VERBOSE 诊断将直接打印 `caller/tl_thread_idx/account_index/mark`，可区分“没走 callback”“收到 -1/0”“setsockopt 失败”“成功”。
 
 修复方式：`check_network_status(connect_only, account_index)` 由认证调用点显式传入账号索引；`probe_add()` 按该索引读取 mark，存到其 `probe_t.mark_ctx`，并用 `CURLOPT_OPENSOCKETDATA` 传给回调。socket callback 不再从 TLS 查询探测 mark。普通认证 GET/POST、认证服务器测速也给 callback 设置稳定生命周期的显式 context。
 

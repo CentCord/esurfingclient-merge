@@ -209,6 +209,19 @@ bool term(void)
     return true;
 }
 
+static void keepalive_set_interval(const uint64_t server_interval)
+{
+    uint64_t interval = server_interval;
+    if (g_runtime_cfg.keepalive_interval_mode == KEEP_INTERVAL_FIXED)
+        interval = g_runtime_cfg.keepalive_interval_sec;
+    else if (g_runtime_cfg.keepalive_interval_mode == KEEP_INTERVAL_CLAMPED)
+    {
+        if (interval < g_runtime_cfg.keepalive_min_interval_sec) interval = g_runtime_cfg.keepalive_min_interval_sec;
+        if (interval > g_runtime_cfg.keepalive_max_interval_sec) interval = g_runtime_cfg.keepalive_max_interval_sec;
+    }
+    g_prog_status[tl_thread_idx].auth_cfg.keep_retry = interval;
+}
+
 bool heartbeat(void)
 {
     char* decrypted_data = dialer_request_plain(HEART_BEAT, g_prog_status[tl_thread_idx].auth_cfg.keep_url, "心跳");
@@ -224,13 +237,15 @@ bool heartbeat(void)
     }
 
     const uint64_t tmp_retry = str2uint64(parsed_interval); // 将字符串时间转成 uint64_t 时间
-    if (tmp_retry < (unsigned long)g_op_timeout * 5)
+    uint64_t scheduled = tmp_retry;
+    if (scheduled >= (unsigned long)g_op_timeout * 5) scheduled -= g_op_timeout * 5;
+    if (g_runtime_cfg.keepalive_interval_mode == KEEP_INTERVAL_SERVER)
     {
-        g_prog_status[tl_thread_idx].auth_cfg.keep_retry = tmp_retry;
+        keepalive_set_interval(scheduled);
     }
     else
     {
-        g_prog_status[tl_thread_idx].auth_cfg.keep_retry = tmp_retry - g_op_timeout * 5;
+        keepalive_set_interval(tmp_retry);
     }
 
     free(parsed_interval);
@@ -257,13 +272,15 @@ bool login(void)
     }
 
     const uint64_t tmp_retry = str2uint64(parsed_keep_retry); // 将字符串时间转成 uint64_t 时间
-    if (tmp_retry < (unsigned long)g_op_timeout * 5)
+    uint64_t scheduled = tmp_retry;
+    if (scheduled >= (unsigned long)g_op_timeout * 5) scheduled -= g_op_timeout * 5;
+    if (g_runtime_cfg.keepalive_interval_mode == KEEP_INTERVAL_SERVER)
     {
-        g_prog_status[tl_thread_idx].auth_cfg.keep_retry = tmp_retry;
+        keepalive_set_interval(scheduled);
     }
     else
     {
-        g_prog_status[tl_thread_idx].auth_cfg.keep_retry = tmp_retry - g_op_timeout * 5;
+        keepalive_set_interval(tmp_retry);
     }
 
     free(parsed_keep_retry);
@@ -274,7 +291,7 @@ bool login(void)
 /**
  * @brief 等待网络进入需要认证的状态
  *
- * 已联网时按 10 秒一次轮询, 网络错误时按 1 秒一次重试, 最多 5 次
+ * 已联网时按探测间隔轮询, 网络错误时等待后重试
  * @return 等待结果
  */
 WaitResult wait_need_auth(void)
@@ -325,6 +342,9 @@ WaitResult wait_need_auth(void)
             // 正常连接到互联网
             retry_network = 1;
             sleep_ms(3000, false);
+            break;
+        case STATUS_PENDING:
+            sleep_ms((uint64_t)g_runtime_cfg.probe_interval_sec * 1000, false);
             break;
         case STATUS_NEED_AUTH:
             // 需要认证

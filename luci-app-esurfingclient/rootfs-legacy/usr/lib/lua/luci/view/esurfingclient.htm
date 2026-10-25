@@ -880,6 +880,9 @@ end
 
     conn_timeout.addEventListener('change', function(e) {
         config.conn_timeout = normalizeTimeout(e.target.value, 3);
+        config.runtime = config.runtime || {};
+        config.runtime.auth = config.runtime.auth || {};
+        config.runtime.auth.connect_timeout_sec = config.conn_timeout;
         e.target.value = config.conn_timeout;
     });
 
@@ -888,6 +891,9 @@ end
 
     op_timeout.addEventListener('change', function(e) {
         config.op_timeout = normalizeTimeout(e.target.value, 5);
+        config.runtime = config.runtime || {};
+        config.runtime.auth = config.runtime.auth || {};
+        config.runtime.auth.request_timeout_sec = config.op_timeout;
         e.target.value = config.op_timeout;
     });
 
@@ -898,6 +904,10 @@ end
         // 旧配置文件可能缺少超时参数, 这里补齐默认值, 避免输入框显示空值
         config.conn_timeout = normalizeTimeout(config.conn_timeout, 3);
         config.op_timeout = normalizeTimeout(config.op_timeout, 5);
+        if (config.runtime && config.runtime.auth) {
+            config.conn_timeout = normalizeTimeout(config.runtime.auth.connect_timeout_sec, config.conn_timeout);
+            config.op_timeout = normalizeTimeout(config.runtime.auth.request_timeout_sec, config.op_timeout);
+        }
         conn_timeout.value = config.conn_timeout;
         op_timeout.value = config.op_timeout;
         renderTable();

@@ -134,42 +134,40 @@
 }
 ```
 
-### 4.2 参数清单
+### 4.2 参数清单（阶段 2 已落地）
 
-默认值以兼容当前实现和实测（server keep 常见 300s）为目标；范围是推荐校验范围。函数名按当前结构指向，未来可拆配置读取和策略模块。
+以下为当前实现值和范围；配置缺省时保留 v2.2.0-r7 行为。对应位置使用仓库相对路径，具体行号以当前文件为准。
 
-| 参数名 / JSON 键 | 类型；默认；范围 | 作用 | 使用位置（建议） |
+| JSON 键 | 类型；默认；范围 | 作用 | 对应代码位置 |
 |---|---|---|---|
-| 最大认证重试次数 `runtime.reconnect.max_attempts` | 整数；`0`；0–1000，0 表示不设上限 | 控制认证失败重试预算 | `Config.c` 解析；`DialerClient.c:run()` 认证失败分支 |
-| 无限重试 `runtime.reconnect.infinite` | 布尔；`true`；true/false | 明确无限重试；false 时达到 max_attempts 后暂停并告警。与 max_attempts=0 的语义需校验一致 | 同上 |
-| 退避策略 `runtime.reconnect.backoff` | 枚举；`sequence`；`fixed`/`exponential`/`sequence` | 固定间隔、指数退避或自定义序列 | `DialerClient.c:run()`/纯函数 `next_retry_delay()` |
-| 自定义序列 `runtime.reconnect.intervals_sec` | 正整数数组；`[60,180,300,600,1200,1800]`；1–86400 秒，最多 32 项 | sequence 策略的间隔，最后一项封顶复用 | 同上，替代 `DialerClient.c:49` |
-| 固定间隔 `runtime.reconnect.fixed_interval_sec` | 整数；300；1–86400 | fixed 策略间隔 | 同上 |
-| 指数初始间隔 `runtime.reconnect.base_sec` | 整数；60；1–3600 | exponential 起点 | 同上 |
-| 退避倍数 `runtime.reconnect.multiplier` | 浮点；2.0；1.1–5.0 | 每次失败的倍数 | 同上 |
-| 最大退避 `runtime.reconnect.max_sec` | 整数；1800；1–86400 | 所有策略的最大等待上限 | 同上 |
-| 随机抖动 `runtime.reconnect.jitter_sec` | 整数；30；0–3600 | 每账号额外随机错开，默认应使用 full jitter 或对称 jitter 并避免负等待 | `DialerClient.c:wait_auth_retry()`；OpenWrt 多进程时用安全随机数 |
-| 线路错误重试上限 `runtime.reconnect.line_error_max_attempts` | 整数；0；0–1000，0 无限 | 代替线路错误固定 5 次退出；线路恢复后重置计数 | `DialerClient.c:252-263`、`DialerNet.c:wait_need_auth()` |
-| 线路错误间隔 `runtime.reconnect.line_error_interval_sec` | 整数；10；1–3600 | 当前固定 10 秒；线路错误建议也用退避并抖动 | `DialerClient.c:252-263` |
-| 认证连接超时 `runtime.auth.connect_timeout_sec` | 整数；10；1–120 | connect timeout；作为现有 `conn_timeout` 的兼容别名/迁移目标 | `NetClient.c` get/post；`Config.c` |
-| 认证请求总超时 `runtime.auth.request_timeout_sec` | 整数；15；1–300 | 请求整体超时；对应现有 `op_timeout` | `NetClient.c` get/post；`Config.c` |
-| 认证错峰 `runtime.auth.stagger_sec` | 整数；20；0–600 | 首次启动按账号序号错开（账号序号偏移 + 抖动）；不建议每次重启都完全同步 | OpenWrt init 调度/`DialerAuth.c` 进入 auth 前 |
-| 会话失效最小等待 `runtime.auth.session_invalid_wait_sec` | 整数；60；0–86400 | 明确 SESSION_INVALID 后等待再认证；频率限制响应应由 slow 错误更长退避覆盖 | `DialerClient.c` 错误分类到重认证的转换点 |
-| 心跳周期模式 `runtime.keepalive.interval_mode` | 枚举；`server`；`server`/`fixed`/`clamped` | server 尊重服务端下发；fixed 使用用户周期；clamped 使用服务端周期但限于 min/max | `DialerNet.c:218-237, 251-270` |
-| 固定心跳周期 `runtime.keepalive.interval_sec` | 整数；300；30–3600 | 仅 fixed 模式使用；默认展示建议值，不覆盖服务端 | `DialerClient.c:156-165` 周期判定 |
-| 心跳周期下限 `runtime.keepalive.min_interval_sec` | 整数；30；10–3600 | clamped 模式下限，防止过快心跳 | `DialerNet.c` interval 解析 |
-| 心跳周期上限 `runtime.keepalive.max_interval_sec` | 整数；1800；60–7200 | clamped 模式上限，避免过久不 keep | `DialerNet.c` interval 解析 |
-| 心跳失败重试次数 `runtime.keepalive.failure_retries` | 整数；5；0–20 | 取代 `DialerClient.c:167-180` 固定 5 次；0 表示不重试，不能表示无限 | `DialerClient.c:run()` |
-| 心跳失败重试间隔 `runtime.keepalive.retry_interval_sec` | 整数；1；1–300 | 当前固定 1 秒；应采用轻量指数/抖动，避免多账号同步打 keep | `DialerClient.c:167-180` |
-| 探测间隔 `runtime.probe.interval_sec` | 整数；2；1–3600 | Web 后台及 auth 探测节奏需分别支持 override 或共用配置 | `CheckNetwork.c:35-36, 410-434`；认证轮询等待点 |
-| 探测连接超时 `runtime.probe.connect_timeout_ms` | 整数；3000；250–30000 | 替代 curl 探测连接固定超时 | `CheckNetwork.c:24-33, probe_add()` |
-| 探测总超时 `runtime.probe.request_timeout_ms` | 整数；4000；500–60000 | 替代探测总超时与 deadline 常量 | `CheckNetwork.c:24-33, 281-289` |
-| 探测失败容忍次数 `runtime.probe.failure_tolerance` | 整数；3；1–20 | 连续线路错误达到阈值才标记线路故障；不直接重认证 | `CheckNetwork.c:probe_group()` 调用方状态聚合 |
-| 门户确认次数 `runtime.probe.portal_confirmations` | 整数；2；1–10 | 连续观察到 302 才确认需要认证；与线路错误计数独立 | `DialerClient.c:run()` 状态判定前 |
-| 会话确认心跳次数 `runtime.keepalive.invalid_confirmations` | 整数；1；1–5 | 如协议响应可辨认会话失效，要求明确码；模糊错误不计为失效，网络错误按 transient 处理 | `DialerNet.c:dialer_request_plain()` 与 `DialerClient.c` 状态转换 |
-| 本地 pulse `runtime.keepalive.local_pulse_interval_sec` | 整数；30；5–300 | 仅当未来实现 excheck/pulse 才生效；当前 C 版无 pulse，UI 应标为“预留/未支持”或暂不暴露 | 新增 pulse 模块，不对应现有使用点 |
+| `runtime.reconnect.enabled` | bool；true；true/false | false 时一次失败后进入进程内暂停，日志提示重启服务可手动重试 | `ConfigDefaults.c:79-107, runtime_config_load()`; `DialerClient.c:276-280, 315-323` |
+| `runtime.reconnect.max_attempts` | 整数；0；0–1,000,000，0 无限 | 限制认证失败后的重试次数 | `ConfigDefaults.c:110-187`; `DialerClient.c:293-298` |
+| `runtime.reconnect.line_error_max_attempts` | 整数；5；0–1,000,000，0 无限 | 保留 r7 的线路错误退出次数，可单独禁用上限 | `ConfigDefaults.c:59-60, 163-164`; `DialerClient.c:313-325` |
+| `runtime.reconnect.line_error_interval_sec` | 整数；10；1–3600 | 线路探测错误后的等待秒数；附加 reconnect jitter | `ConfigDefaults.c:60, 164`; `DialerClient.c:327-331` |
+| `runtime.reconnect.backoff` | string enum；sequence；fixed/exponential/sequence | 选择认证退避算法 | `ConfigDefaults.c:165-172`; `DialerClient.c:58-80` |
+| `runtime.reconnect.intervals_sec` | 整数数组；[60,180,300,600,1200,1800]；1–86400，1–32 项 | sequence 间隔；最后一档重复使用 | `ConfigDefaults.c:61-63, 173-191`; `DialerClient.c:73-78` |
+| `runtime.reconnect.fixed_interval_sec` | 整数；300；1–86400 | fixed 策略等待 | `ConfigDefaults.c:193`; `DialerClient.c:63-64` |
+| `runtime.reconnect.base_sec` | 整数；60；1–3600 | 指数退避起点 | `ConfigDefaults.c:194`; `DialerClient.c:65-71` |
+| `runtime.reconnect.multiplier` | number；2.0；1.1–5.0 | 指数退避倍率 | `ConfigDefaults.c:195`; `DialerClient.c:67-71` |
+| `runtime.reconnect.max_sec` | 整数；1800；1–86400 | 退避上限；slow 分类默认用上限 | `ConfigDefaults.c:196`; `DialerClient.c:61-83` |
+| `runtime.reconnect.jitter_sec` | 整数；0；0–3600 | 认证退避附加随机秒数；0 保持 r7 行为 | `ConfigDefaults.c:197`; `DialerClient.c:50-56, 80` |
+| `runtime.auth.connect_timeout_sec` | 整数；10；1–120 | 认证/HTTP socket 连接超时 | `ConfigDefaults.c:198`; `Config.c:491-493`; `NetClient.c:163, 294` |
+| `runtime.auth.request_timeout_sec` | 整数；15；1–300 | 认证/HTTP 请求总超时 | `ConfigDefaults.c:199`; `Config.c:491-493`; `NetClient.c:165, 296` |
+| `runtime.auth.stagger_sec` | 整数；0；0–600 | 首次启动按账号序号乘以秒数延迟；0 保持 r7 行为 | `ConfigDefaults.c:200`; `DialerAuth.c:236-245` |
+| `runtime.auth.session_invalid_wait_sec` | 整数；0；0–86400 | 探测确认需认证后、重置会话前的最小等待 | `ConfigDefaults.c:201`; `DialerClient.c:239-245` |
+| `runtime.keepalive.interval_mode` | string enum；server；server/fixed/clamped | 采用服务端周期、配置固定周期或按边界夹取 | `ConfigDefaults.c:203-210`; `DialerNet.c:212-231` |
+| `runtime.keepalive.interval_sec` | 整数；300；30–3600 | fixed 模式周期 | `ConfigDefaults.c:211`; `DialerNet.c:212-222` |
+| `runtime.keepalive.min_interval_sec` / `max_interval_sec` | 整数；30/1800；10–3600 / 60–7200 | clamped 模式的边界；min 大于 max 时两者回退默认值 | `ConfigDefaults.c:212-218`; `DialerNet.c:212-225` |
+| `runtime.keepalive.failure_retries` | 整数；5；0–20 | 初次失败后的心跳重试数，缺省与 r7 一致 | `ConfigDefaults.c:220`; `DialerClient.c:205-226` |
+| `runtime.keepalive.retry_interval_sec` | 整数；1；1–300 | 心跳失败后的等待秒数 | `ConfigDefaults.c:221`; `DialerClient.c:219-225` |
+| `runtime.keepalive.retry_jitter_sec` | 整数；0；0–60 | 心跳重试附加随机秒数 | `ConfigDefaults.c:222`; `DialerClient.c:224-225` |
+| `runtime.probe.interval_sec` | 整数；2；1–3600 | Web 后台探测循环；认证主循环的旧轮询节奏保留以兼容 r7 | `ConfigDefaults.c:223`; `CheckNetwork.c:445-469` |
+| `runtime.probe.connect_timeout_ms` | 整数；3000；250–30000 | 每个 HTTP 探测连接超时 | `ConfigDefaults.c:224`; `CheckNetwork.c:134-140` |
+| `runtime.probe.request_timeout_ms` | 整数；4000；500–60000 | 探测请求总超时及 multi deadline；必须不小于连接超时 | `ConfigDefaults.c:225-231`; `CheckNetwork.c:134-140, 283` |
+| `runtime.probe.line_error_tolerance` | 整数；1；1–20 | 连续线路探测失败阈值；1 保留 r7 单次判定 | `ConfigDefaults.c:232`; `CheckNetwork.c:362-370` |
+| `runtime.probe.portal_confirmations` | 整数；1；1–10 | 连续 302 确认次数；1 保留 r7 单次判定 | `ConfigDefaults.c:233`; `CheckNetwork.c:371-377` |
 
-**语义要求**：`max_attempts=0` 与 `infinite=true` 不允许互相矛盾；建议以 `infinite` 为权威开关，有限时 max_attempts 必须 ≥1。区分“会话失效等待”和错误码 11064000 的慢速限流等待：后者应按 `AUTH_ERROR_SLOW` 单独设置保守间隔，不能只等默认 60 秒。
+旧根级 `conn_timeout`/`op_timeout` 在首次创建 runtime 配置时迁移到 `runtime.auth`；新版/旧版 LuCI 的现有超时输入同时回写 runtime.auth，以后以 runtime 值为准。实现未添加规格外的 `infinite` 开关；max_attempts=0 表示认证重试不设上限，enabled=false 表示一次失败后暂停。错误码分类为 fatal/slow 的现有处理仍保留。
 
 ### 4.3 建议状态流
 

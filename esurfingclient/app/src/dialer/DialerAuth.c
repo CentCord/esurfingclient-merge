@@ -235,6 +235,15 @@ int work_auth(void)
      */
     g_prog_status[0].thread_id = sim_thread_cur_id();
 
+    /* 仅首次启动时按配置序号延迟认证，默认 0 秒以保持 v2.2.0-r7 行为。 */
+    if (g_runtime_cfg.auth_stagger_sec > 0 && g_prog_status[0].login_cfg.idx > 1)
+    {
+        const uint64_t stagger_ms = (uint64_t)(g_prog_status[0].login_cfg.idx - 1) *
+                                    g_runtime_cfg.auth_stagger_sec * 1000;
+        LOG_INFO("账号启动错峰等待 %" PRIu64 " 毫秒", stagger_ms);
+        sleep_ms(stagger_ms, true);
+    }
+
 #ifndef __OPENWRT__
 
     /**

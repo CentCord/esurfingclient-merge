@@ -111,6 +111,9 @@ bool get_last_location(void)
             // 需要认证
             quit = true;
             break;
+        case STATUS_PENDING:
+            sleep_ms((uint64_t)g_runtime_cfg.probe_interval_sec * 1000, true);
+            break;
         default:
             // 网络错误
             if (retry > 5)

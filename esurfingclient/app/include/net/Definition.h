@@ -18,6 +18,7 @@ typedef enum {
     STATUS_NEED_AUTH = 1,
     STATUS_ERROR = 2,
     STATUS_INIT_ERROR = 3,
+    STATUS_PENDING = 4,
 } network_status_t;
 
 typedef enum
