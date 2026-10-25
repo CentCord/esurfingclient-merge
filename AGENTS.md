@@ -37,7 +37,9 @@
   实测证据：VM 里 4 个账号的探测仍全部走主线路。
 - 完整修复：`check_network_status(connect_only, account_index)` 显式传账号索引，`probe_add` 把 mark
   存进 `probe_t.mark_ctx`，用 `CURLOPT_OPENSOCKETDATA` 传给回调（本 fork 的 `94e64ef`）。
-- 上游 `5005d2e` 也修了这条，但用的是“回调里判断 `tl_thread_idx >= 0`”的简化版，**大概率仍解决不了启动探测**。
+- 上游 `5005d2e` 也修了这条，但用的是“回调里判断 `tl_thread_idx >= 0`”的简化版。
+**已实测确认它解决不了启动探测**：单账号（mark 0x200）18 秒，上游在主线路漏 4 个 SYN，
+本 fork 显式传索引后为 0；对照数据见 [UPSTREAM-BUG-REPORT.md](UPSTREAM-BUG-REPORT.md) 第 1 节。
 
 **U-02 SO_MARK 设置失败后仍然发请求** ✅
 
