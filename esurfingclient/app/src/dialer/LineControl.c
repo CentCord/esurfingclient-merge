@@ -160,7 +160,8 @@ bool line_control_tick(void)
     const uint64_t now = now_ms();
     if (s->line_state == LINE_STATE_FATAL || s->is_retry_paused)
     {
-        if (s->line_state == LINE_STATE_FATAL) { sleep_ms(1000, false); return false; }
+        sleep_ms(1000, false);
+        return false;
     }
     if (s->rate_limited_until_ms > now)
     {

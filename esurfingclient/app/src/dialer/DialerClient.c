@@ -170,6 +170,14 @@ static bool confirm_session_alive(void)
     return true;
 }
 
+static bool pause_reauth_if_disabled(void)
+{
+    if (g_runtime_cfg.reconnect_enabled) return false;
+    g_prog_status[tl_thread_idx].runtime_status.is_retry_paused = true;
+    LOG_WARN("自动重连已关闭，认证实例保持停止状态；重启服务可手动重试");
+    return true;
+}
+
 static RunStatus run(void)
 {
     static uint32_t retry_timeout = 1;
@@ -219,6 +227,7 @@ static RunStatus run(void)
         if (failed->line_state == LINE_STATE_RATE_LIMITED || failed->line_state == LINE_STATE_FATAL)
             return RUN_SUCCESS;
         line_control_session_invalid("门户探测且会话心跳确认失败");
+        if (pause_reauth_if_disabled()) return RUN_SUCCESS;
         if (g_prog_status[tl_thread_idx].runtime_status.line_is_down) return RUN_SUCCESS;
     }
 
@@ -256,14 +265,9 @@ static RunStatus run(void)
                             if (failed->line_state == LINE_STATE_RATE_LIMITED || failed->line_state == LINE_STATE_FATAL)
                                 return RUN_SUCCESS;
                             line_control_session_invalid("心跳连续失败，按会话失效处理");
+                            if (pause_reauth_if_disabled()) return RUN_SUCCESS;
                             if (g_prog_status[tl_thread_idx].runtime_status.line_is_down)
                                 return RUN_SUCCESS;
-                            if (!g_runtime_cfg.reconnect_enabled)
-                            {
-                                g_prog_status[tl_thread_idx].runtime_status.is_retry_paused = true;
-                                LOG_WARN("自动重连已关闭，认证实例保持停止状态；重启服务可手动重试");
-                                return RUN_SUCCESS;
-                            }
                             return RUN_FAILED;
                         }
                         LOG_WARN("配置 %" PRIu8 " 心跳包发送失败, 下标 %" PRIu8 ", 重试: 第 %" PRIu8 " 次, 最多 5 次",
@@ -329,12 +333,7 @@ static RunStatus run(void)
             }
 
             uint64_t wait_seconds = 0;
-            if (!g_runtime_cfg.reconnect_enabled)
-            {
-                g_prog_status[tl_thread_idx].runtime_status.is_retry_paused = true;
-                LOG_WARN("自动重连已关闭，认证实例保持停止状态；重启服务可手动重试");
-                return RUN_SUCCESS;
-            }
+            if (pause_reauth_if_disabled()) return RUN_SUCCESS;
             if (kind == AUTH_ERROR_FATAL)
             {
                 /**
@@ -372,12 +371,7 @@ static RunStatus run(void)
         if ((g_runtime_cfg.reconnect_line_error_max_attempts != 0 && retry_timeout > g_runtime_cfg.reconnect_line_error_max_attempts) ||
             !g_runtime_cfg.reconnect_enabled)
         {
-            if (!g_runtime_cfg.reconnect_enabled)
-            {
-                g_prog_status[tl_thread_idx].runtime_status.is_retry_paused = true;
-                LOG_WARN("自动重连已关闭，网络恢复后重启服务可再次尝试");
-                return RUN_SUCCESS;
-            }
+            if (pause_reauth_if_disabled()) return RUN_SUCCESS;
             LOG_ERROR("超过最多重试次数");
             return RUN_FAILED;
         }
