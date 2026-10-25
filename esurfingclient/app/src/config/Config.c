@@ -580,7 +580,15 @@ bool load_cfg(void)
                 LOG_WARN("其它配置使用了自定义标记值, 但配置 %" PRIu8 " 未填写, 将跳过该配置", i + 1);
                 continue;
             }
-            login->mark = 0x100 + valid_i * 0x100;
+            /*
+                 * 用配置的原始下标算 mark, 不用有效账号序号 valid_i
+                 *
+                 * mwan3 的约定是 mark = iface_id << 8, 而 iface_id 取决于接口在
+                 * /etc/config/mwan3 里的声明顺序 —— 也就是账号在配置里的位置。
+                 * 若前面有账号因非法被跳过, valid_i 会前移, 后续账号的 mark 全部
+                 * 错位, 流量就会串到别人的线路上。
+                 */
+                login->mark = 0x100 + (uint32_t)(i + 1) * 0x100;
             LOG_DEBUG("使用自动标记值: %" PRIu32 " (0x%x)", login->mark, login->mark);
             LOG_DEBUG("当前使用下标: %" PRIu8, valid_i);
         }
@@ -611,7 +619,15 @@ bool load_cfg(void)
             }
             else
             {
-                login->mark = 0x100 + valid_i * 0x100;
+                /*
+                 * 用配置的原始下标算 mark, 不用有效账号序号 valid_i
+                 *
+                 * mwan3 的约定是 mark = iface_id << 8, 而 iface_id 取决于接口在
+                 * /etc/config/mwan3 里的声明顺序 —— 也就是账号在配置里的位置。
+                 * 若前面有账号因非法被跳过, valid_i 会前移, 后续账号的 mark 全部
+                 * 错位, 流量就会串到别人的线路上。
+                 */
+                login->mark = 0x100 + (uint32_t)(i + 1) * 0x100;
                 LOG_DEBUG("使用自动标记值: %" PRIu32 " (0x%x)", login->mark, login->mark);
                 LOG_DEBUG("当前使用下标: %" PRIu8, valid_i);
             }
