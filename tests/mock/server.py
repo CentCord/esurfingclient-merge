@@ -246,8 +246,11 @@ class Handler(BaseHTTPRequestHandler):
         elif scenario == "anti_sharing":
             error = "-600"
         if error:
-            self.model.event("auth_rejected", client_id=client_id, user=user, error_code=error, sub_error=sub_error)
-            self.xml_reply(403, "<response><error>denied</error></response>", error=error, sub_error=sub_error)
+            http_status = getattr(self.model.args, "error_http_status", 403)
+            self.model.event("auth_rejected", client_id=client_id, user=user, error_code=error,
+                             sub_error=sub_error, http_status=http_status)
+            self.xml_reply(http_status,
+                           "<response><error>denied</error></response>", error=error, sub_error=sub_error)
             return
         with self.model.lock:
             self.model.sessions[ticket] = {"client_id": client_id, "peer_ip": self.client_address[0], "user": user,
@@ -341,6 +344,8 @@ def main(argv=None):
     p.add_argument("--esurface-root", default="/Users/orpheus/Desktop/天翼校园网/esurface")
     p.add_argument("--after", type=float, default=2, help="expire/flap/kick period in seconds")
     p.add_argument("--duration", type=float, default=1800, help="rate limit duration in seconds")
+    p.add_argument("--error-http-status", type=int, choices=(200, 403), default=403,
+                   help="HTTP status for auth errors; use 200 to test header classification")
     p.add_argument("--delay", type=float, default=16, help="slow or keep timeout delay in seconds")
     p.add_argument("--loss-percent", type=float, default=30)
     p.add_argument("--seed", type=int, default=1)

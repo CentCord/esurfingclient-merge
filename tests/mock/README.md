@@ -32,7 +32,7 @@ $PY tests/mock/c_native_smoke.py --evidence-dir tests/mock/evidence
 
 `tests/mock/evidence/normal.jsonl`、`session_expire_after.jsonl`、`rate_limit.jsonl` 是本轮三项验收日志；`assertion_passed` 表示 HTTP 断言通过。日志不含真实账号密码，时间戳按运行时记录。其余九个场景也由同一命令跑过，见同目录日志。
 
-`c_native_smoke.py` 将 `esurfingclient/app` 复制到临时目录，**只在临时副本中**把三个固定探测 URL、认证服务地址和门户触发 URL 改为本机 mock 端口；然后用 C 编译器与已有 libcurl 编译 CMake 所列的 85 个 C 源文件，并启动真正的 `--role auth --account 1` 二进制（假账号，`iface` 留空）。环境代理被清除，所有测试网络目标在临时副本中都指向 127.0.0.1。`tests/mock/evidence/c-native-{normal,session_expire_after,rate_limit}.jsonl` 是服务端事件，同行 `.log` 是 C INFO/ERROR 摘要；程序源文件未修改。此项验证覆盖本机 C 协议链、重认证、限流状态，**不覆盖 OpenWrt 的 SO_MARK、接口 down/up 和 mwan3**。
+`c_native_smoke.py` 将 `esurfingclient/app` 复制到临时目录，**只在临时副本中**把三个固定探测 URL、认证服务地址和门户触发 URL 改为本机 mock 端口；然后用 C 编译器与已有 libcurl 编译 CMake 所列的 85 个 C 源文件，并启动真正的 `--role auth --account 1` 二进制（假账号，`iface` 留空）。环境代理被清除，所有测试网络目标在临时副本中都指向 127.0.0.1。`tests/mock/evidence/c-native-{normal,session_expire_after,rate_limit}.jsonl` 是服务端事件，同行 `.log` 是 C INFO/ERROR 摘要；程序源文件未修改。`--scenario rate_limit_http_200` 额外验证 HTTP 200 携带 `102/11064000` 错误头时仍进入 `RATE_LIMITED`；`c-native-rate_limit_http_200-before-h03.log` 保存旧代码每秒重试的复现，修复后的同名前缀 `.log/.jsonl` 保存隔离结果。此项验证覆盖本机 C 协议链、重认证、限流状态，**不覆盖 OpenWrt 的 SO_MARK、接口 down/up 和 mwan3**。
 
 ## C 版 OpenWrt VM 接法
 

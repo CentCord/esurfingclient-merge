@@ -1,0 +1,11 @@
+{"client_id": "", "event": "probe_302", "scenario": "rate_limit", "ts": 1792950375.816}
+{"client_id": "", "event": "probe_302", "scenario": "rate_limit", "ts": 1792950375.816}
+{"client_id": "c351a10a-bde7-4f94-03b6-8782b1a33248", "event": "probe_302", "scenario": "rate_limit", "ts": 1792950375.817}
+{"client_id": "", "event": "probe_302", "scenario": "rate_limit", "ts": 1792950375.817}
+{"client_id": "", "event": "probe_302", "scenario": "rate_limit", "ts": 1792950375.817}
+{"client_id": "", "event": "probe_302", "scenario": "rate_limit", "ts": 1792950375.823}
+{"client_id": "", "event": "probe_302", "scenario": "rate_limit", "ts": 1792950375.823}
+{"algo_id": "DEABB8C8-A2BC-48CA-8ED0-8CDF1BD62F61", "client_id": "c351a10a-bde7-4f94-03b6-8782b1a33248", "event": "module", "scenario": "rate_limit", "ts": 1792950375.824}
+{"client_id": "c351a10a-bde7-4f94-03b6-8782b1a33248", "event": "ticket_issued", "scenario": "rate_limit", "ticket": "MOCK-00000001", "ts": 1792950375.825}
+{"client_id": "c351a10a-bde7-4f94-03b6-8782b1a33248", "error_code": "102", "event": "auth_rejected", "http_status": 200, "scenario": "rate_limit", "sub_error": "11064000", "ts": 1792950375.826, "user": "fake-user"}
+{"event": "c_native_assertion_passed", "exit_code": 0, "scenario": "rate_limit_http_200", "ts": 1792950382.835}

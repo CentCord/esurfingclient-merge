@@ -1,0 +1,16 @@
+[2026-10-26 01:44:25] [auth#1 pid=89205] [main] [INFO] [LineControl.c:72] 线路状态账号=1 mark=0x0 iface=- UNKNOWN -> PORTAL_REDIRECT 原因=网络探测收到门户重定向
+[2026-10-26 01:44:25] [auth#1 pid=89205] [main] [INFO] [CheckNetwork.c:406] 需要认证
+[2026-10-26 01:44:25] [auth#1 pid=89205] [main] [INFO] [DialerServer.c:157] 选择认证服务器: 127.0.0.1:50367 (连接耗时 0 ms)
+[2026-10-26 01:44:25] [auth#1 pid=89205] [main] [ERROR] [DialerNet.c:271] 解析 KeepRetry 失败
+[2026-10-26 01:44:25] [auth#1 pid=89205] [main] [ERROR] [DialerAuth.c:177] 登录失败
+[2026-10-26 01:44:25] [auth#1 pid=89205] [main] [ERROR] [DialerClient.c:334] 配置 1 认证失败: 没拿到服务端错误码, 按网络问题处理
+[2026-10-26 01:44:26] [auth#1 pid=89205] [main] [ERROR] [DialerNet.c:271] 解析 KeepRetry 失败
+[2026-10-26 01:44:26] [auth#1 pid=89205] [main] [ERROR] [DialerAuth.c:177] 登录失败
+[2026-10-26 01:44:26] [auth#1 pid=89205] [main] [ERROR] [DialerClient.c:334] 配置 1 认证失败: 没拿到服务端错误码, 按网络问题处理
+[2026-10-26 01:44:27] [auth#1 pid=89205] [main] [ERROR] [DialerNet.c:271] 解析 KeepRetry 失败
+[2026-10-26 01:44:27] [auth#1 pid=89205] [main] [ERROR] [DialerAuth.c:177] 登录失败
+[2026-10-26 01:44:27] [auth#1 pid=89205] [main] [ERROR] [DialerClient.c:334] 配置 1 认证失败: 没拿到服务端错误码, 按网络问题处理
+[2026-10-26 01:44:28] [auth#1 pid=89205] [main] [ERROR] [DialerNet.c:271] 解析 KeepRetry 失败
+[2026-10-26 01:44:28] [auth#1 pid=89205] [main] [ERROR] [DialerAuth.c:177] 登录失败
+[2026-10-26 01:44:28] [auth#1 pid=89205] [main] [ERROR] [DialerClient.c:334] 配置 1 认证失败: 没拿到服务端错误码, 按网络问题处理
+[2026-10-26 01:44:28] [auth#1 pid=89205] [main] [WARN] [DialerClient.c:353] 认证重试达到 max_attempts=3，实例保持停止状态

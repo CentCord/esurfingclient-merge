@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build a temporary native C client with loopback endpoints; run three CDC scenarios."""
+"""Build a temporary native C client with loopback endpoints; run CDC scenarios."""
 
 import argparse
 import json
@@ -17,7 +17,7 @@ from server import Handler, Model, ThreadingHTTPServer, load_crypto
 
 
 REPO = Path(__file__).resolve().parents[2]
-SCENARIOS = ("normal", "session_expire_after", "rate_limit")
+SCENARIOS = ("normal", "session_expire_after", "rate_limit", "rate_limit_http_200")
 
 
 def replace_one(path, old, new):
@@ -84,7 +84,7 @@ def run_case(binary, temp, model, scenario, evidence_dir):
     process = subprocess.Popen([str(binary), "--role", "auth", "--account", "1"],
                                stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, env=env)
     try:
-        output, _ = process.communicate(timeout=11 if scenario != "rate_limit" else 7)
+        output, _ = process.communicate(timeout=7 if scenario.startswith("rate_limit") else 11)
     except subprocess.TimeoutExpired:
         process.send_signal(signal.SIGTERM)
         try:
@@ -104,6 +104,8 @@ def run_case(binary, temp, model, scenario, evidence_dir):
         assert "SESSION_INVALID" in output
     else:
         assert '"event": "auth_rejected"' in data and '"sub_error": "11064000"' in data
+        if scenario == "rate_limit_http_200":
+            assert '"http_status": 200' in data
         assert "RATE_LIMITED" in output
     assert "线路状态" in output or "登录" in output, output[-1000:]
     model.event("c_native_assertion_passed", scenario=scenario, exit_code=process.returncode)
@@ -114,6 +116,7 @@ def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--esurface-root", default="/Users/orpheus/Desktop/天翼校园网/esurface")
     p.add_argument("--evidence-dir", type=Path, default=REPO / "tests/mock/evidence")
+    p.add_argument("--scenario", choices=("all",) + SCENARIOS, default="all")
     args = p.parse_args()
     args.evidence_dir.mkdir(parents=True, exist_ok=True)
     server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
@@ -124,10 +127,12 @@ def main():
             temp = Path(tmp)
             binary, count = build(temp, server.server_port)
             print(f"native C build: {count} sources, loopback port {server.server_port}")
-            for scenario in SCENARIOS:
+            for scenario in SCENARIOS if args.scenario == "all" else (args.scenario,):
                 (args.evidence_dir / f"c-native-{scenario}.jsonl").write_text("", encoding="utf-8")
                 model_args = argparse.Namespace(
-                    scenario=scenario, seed=1, loss_percent=0, after=6, duration=1800,
+                    scenario="rate_limit" if scenario == "rate_limit_http_200" else scenario,
+                    error_http_status=200 if scenario == "rate_limit_http_200" else 403,
+                    seed=1, loss_percent=0, after=6, duration=1800,
                     delay=0, keep_interval=76, bandwidth=[],
                     log_file=str(args.evidence_dir / f"c-native-{scenario}.jsonl"),
                 )

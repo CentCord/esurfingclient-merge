@@ -46,6 +46,14 @@ static char* dialer_encrypt_payload(const XmlChoose kind)
     return encrypt;
 }
 
+/* HTTP 200 也可能携带服务端错误；只有 Error-Code=0/空且无 Sub-Error 才是成功。 */
+static bool response_has_server_error(const curl_resp_t* resp)
+{
+    return resp != NULL
+        && ((resp->error_code[0] != '\0' && strcmp(resp->error_code, "0") != 0)
+            || (resp->sub_error[0] != '\0' && strcmp(resp->sub_error, "0") != 0));
+}
+
 /**
  * @brief 走一遍"构造报文 → 加密 → POST → 解密"
  *
@@ -68,6 +76,14 @@ char* dialer_request_plain(const XmlChoose kind, const char* url, const char* wh
     if (resp.http_code != HTTP_OK || resp.body_size == 0 || resp.body_data == NULL)
     {
         LOG_ERROR("%s响应失败", safe_str(what));
+        error_code_record(&resp);
+        curl_resp_free(&resp);
+        return NULL;
+    }
+    if (response_has_server_error(&resp))
+    {
+        LOG_ERROR("%s服务端返回错误码: Error-Code=%s, Sub-Error=%s", safe_str(what),
+                  resp.error_code, resp.sub_error);
         error_code_record(&resp);
         curl_resp_free(&resp);
         return NULL;
@@ -163,6 +179,15 @@ char* dialer_request_ticket(const XmlChoose kind, const char* url, const char* w
                 safe_str(what), g_prog_status[tl_thread_idx].auth_cfg.algo_id);
             curl_resp_free(&resp);
             continue;
+        }
+
+        if (response_has_server_error(&resp))
+        {
+            LOG_ERROR("%s服务端返回错误码: Error-Code=%s, Sub-Error=%s", safe_str(what),
+                      resp.error_code, resp.sub_error);
+            error_code_record(&resp);
+            curl_resp_free(&resp);
+            return NULL;
         }
 
         LOG_VERBOSE("%s响应内容: %s", safe_str(what), resp.body_data);
