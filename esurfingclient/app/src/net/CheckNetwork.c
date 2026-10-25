@@ -1,4 +1,5 @@
 #include "net/NetClient.h"
+#include "net/NetClientInternal.h"
 
 #include "utils/log/Logger.h"
 #include "utils/sim/SimThread.h"
@@ -161,6 +162,25 @@ static bool probe_add(CURLM* multi, const char* url, const char* host, const cha
         }
         curl_easy_setopt(handle, CURLOPT_RESOLVE, resolve);
     }
+
+#ifdef __OPENWRT__
+    /**
+     * 探测也必须按账号的 mark 选路
+     *
+     * 认证/心跳请求在 NetClient.c 里已经挂了 open_socket_callback (设置 SO_MARK),
+     * 但网络探测曾经漏掉这一步 —— 于是所有账号的探测都从主路由表出去 (走第一条 WAN),
+     * 探测结果反映的是那条线的会话, 而不是本账号自己的线。
+     *
+     * 多拨部署下这会引发两类问题:
+     *   1) 主线路会话失效时, 所有账号同时判定"需要认证" → 同时登出重登 → 触发
+     *      服务端的 IP 级登录频率限制;
+     *   2) 非主线路的账号会话失效时, 它探测到的却是主线路的 204, 误以为在线,
+     *      永远不去重新认证, 该线路实际处于无会话状态。
+     *
+     * 挂上同一个回调后, 探测就跟认证请求走同一条线路。
+     */
+    curl_easy_setopt(handle, CURLOPT_OPENSOCKETFUNCTION, open_socket_callback);
+#endif
 
     if (curl_multi_add_handle(multi, handle) != CURLM_OK)
     {

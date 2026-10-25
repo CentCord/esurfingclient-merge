@@ -98,7 +98,13 @@ curl_socket_t open_socket_callback(void* client_p, curlsocktype purpose, struct 
         return CURL_SOCKET_BAD;
     }
 
-    if (g_prog_status[tl_thread_idx].login_cfg.mark != 0)
+    /**
+     * 只有落在某个账号线程里 (tl_thread_idx >= 0) 才有 mark 可设
+     *
+     * Web 进程的后台探测线程没有账号上下文, tl_thread_idx 是 -1,
+     * 直接下标访问会越界读 g_prog_status[-1]。
+     */
+    if (tl_thread_idx >= 0 && g_prog_status[tl_thread_idx].login_cfg.mark != 0)
     {
         if (setsockopt(sock_fd, SOL_SOCKET, SO_MARK, &g_prog_status[tl_thread_idx].login_cfg.mark, sizeof(g_prog_status[tl_thread_idx].login_cfg.mark)) == -1)
         {

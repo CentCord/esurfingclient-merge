@@ -1,4 +1,5 @@
 #include "DialerInternal.h"
+#include "net/NetClientInternal.h"
 
 #include "utils/log/Logger.h"
 
@@ -56,6 +57,16 @@ bool select_auth_server(char* out, const size_t out_len)
         curl_easy_setopt(handle, CURLOPT_CONNECT_ONLY, 1L); // 只建 TCP 连接, 不发请求
         curl_easy_setopt(handle, CURLOPT_NOSIGNAL, 1L);
         curl_easy_setopt(handle, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
+
+#ifdef __OPENWRT__
+        /**
+         * 测速也要走本账号的线路
+         *
+         * 不设 SO_MARK 的话这里会从主路由表出去, 选出来的"最快认证服务器"
+         * 是主线路视角下的结果; 多拨时本账号走另一条线, 未必一样快。
+         */
+        curl_easy_setopt(handle, CURLOPT_OPENSOCKETFUNCTION, open_socket_callback);
+#endif
 
         if (curl_multi_add_handle(multi, handle) != CURLM_OK)
         {
