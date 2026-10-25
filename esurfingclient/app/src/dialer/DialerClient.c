@@ -180,8 +180,9 @@ static bool pause_reauth_if_disabled(void)
 
 static RunStatus run(void)
 {
-    static uint32_t retry_timeout = 1;
-    static uint32_t retry_auth = 1;
+    /* 桌面模式可能有多个账号线程；重试计数只能属于本线程的账号。 */
+    static _Thread_local uint32_t retry_timeout = 1;
+    static _Thread_local uint32_t retry_auth = 1;
 
     if (!line_control_tick()) return RUN_SUCCESS;
     if (g_prog_status[tl_thread_idx].runtime_status.is_retry_paused)
