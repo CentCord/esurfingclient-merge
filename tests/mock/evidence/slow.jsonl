@@ -1,0 +1,2 @@
+{"client_id": "mock-client-1", "event": "probe_302", "scenario": "slow", "ts": 1792949514.735}
+{"event": "assertion_passed", "scenario": "slow", "ts": 1792949514.735}

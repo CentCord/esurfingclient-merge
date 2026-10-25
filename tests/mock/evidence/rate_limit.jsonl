@@ -1,0 +1,6 @@
+{"client_id": "mock-client-1", "event": "probe_302", "scenario": "rate_limit", "ts": 1792949511.573}
+{"algo_id": "DEABB8C8-A2BC-48CA-8ED0-8CDF1BD62F61", "client_id": "mock-client-1", "event": "module", "scenario": "rate_limit", "ts": 1792949511.574}
+{"client_id": "mock-client-1", "event": "ticket_issued", "scenario": "rate_limit", "ticket": "MOCK-00000001", "ts": 1792949511.575}
+{"client_id": "mock-client-1", "error_code": "102", "event": "auth_rejected", "scenario": "rate_limit", "sub_error": "11064000", "ts": 1792949511.575, "user": "fake-user"}
+{"client_id": "mock-client-1", "event": "auth_ok", "scenario": "rate_limit", "ticket": "MOCK-00000001", "ts": 1792949511.925, "user": "fake-user"}
+{"event": "assertion_passed", "scenario": "rate_limit", "ts": 1792949511.925}

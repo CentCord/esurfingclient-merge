@@ -1,0 +1,8 @@
+{"client_id": "mock-client-1", "event": "probe_302", "scenario": "flap", "ts": 1792949514.983}
+{"algo_id": "DEABB8C8-A2BC-48CA-8ED0-8CDF1BD62F61", "client_id": "mock-client-1", "event": "module", "scenario": "flap", "ts": 1792949514.984}
+{"client_id": "mock-client-1", "event": "ticket_issued", "scenario": "flap", "ticket": "MOCK-00000001", "ts": 1792949514.989}
+{"client_id": "mock-client-1", "event": "auth_ok", "scenario": "flap", "ticket": "MOCK-00000001", "ts": 1792949514.989, "user": "fake-user"}
+{"client_id": "mock-client-1", "event": "probe_204", "scenario": "flap", "ts": 1792949514.99}
+{"client_id": "mock-client-1", "event": "probe_302", "scenario": "flap", "ts": 1792949515.197}
+{"client_id": "mock-client-1", "event": "keep_ok", "scenario": "flap", "ticket": "MOCK-00000001", "ts": 1792949515.197}
+{"event": "assertion_passed", "scenario": "flap", "ts": 1792949515.198}

@@ -1,0 +1,8 @@
+{"client_id": "mock-client-1", "event": "probe_302", "scenario": "periodic_kick", "ts": 1792949516.21}
+{"algo_id": "DEABB8C8-A2BC-48CA-8ED0-8CDF1BD62F61", "client_id": "mock-client-1", "event": "module", "scenario": "periodic_kick", "ts": 1792949516.21}
+{"client_id": "mock-client-1", "event": "ticket_issued", "scenario": "periodic_kick", "ticket": "MOCK-00000001", "ts": 1792949516.211}
+{"client_id": "mock-client-1", "event": "auth_ok", "scenario": "periodic_kick", "ticket": "MOCK-00000001", "ts": 1792949516.216, "user": "fake-user"}
+{"age": 0.2, "event": "periodic_kick", "scenario": "periodic_kick", "ticket": "MOCK-00000001", "ts": 1792949516.421}
+{"client_id": "mock-client-1", "error_code": "300", "event": "keep_invalid", "scenario": "periodic_kick", "ticket": "MOCK-00000001", "ts": 1792949516.421}
+{"client_id": "mock-client-1", "event": "term", "scenario": "periodic_kick", "ticket": "MOCK-00000001", "ts": 1792949516.421, "was_alive": false}
+{"event": "assertion_passed", "scenario": "periodic_kick", "ts": 1792949516.422}

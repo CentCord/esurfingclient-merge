@@ -1,0 +1,2 @@
+{"event": "packet_loss", "method": "GET", "path": "/generate_204", "scenario": "partial_loss", "ts": 1792949515.703}
+{"event": "assertion_passed", "scenario": "partial_loss", "ts": 1792949515.704}

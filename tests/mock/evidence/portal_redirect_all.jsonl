@@ -1,0 +1,7 @@
+{"client_id": "mock-client-1", "event": "probe_302", "scenario": "portal_redirect_all", "ts": 1792949511.059}
+{"algo_id": "DEABB8C8-A2BC-48CA-8ED0-8CDF1BD62F61", "client_id": "mock-client-1", "event": "module", "scenario": "portal_redirect_all", "ts": 1792949511.059}
+{"client_id": "mock-client-1", "event": "ticket_issued", "scenario": "portal_redirect_all", "ticket": "MOCK-00000001", "ts": 1792949511.059}
+{"client_id": "mock-client-1", "event": "auth_ok", "scenario": "portal_redirect_all", "ticket": "MOCK-00000001", "ts": 1792949511.06, "user": "fake-user"}
+{"client_id": "mock-client-1", "event": "probe_302", "scenario": "portal_redirect_all", "ts": 1792949511.061}
+{"client_id": "mock-client-1", "event": "keep_ok", "scenario": "portal_redirect_all", "ticket": "MOCK-00000001", "ts": 1792949511.066}
+{"event": "assertion_passed", "scenario": "portal_redirect_all", "ts": 1792949511.066}

@@ -1,0 +1,5 @@
+{"client_id": "mock-client-1", "event": "probe_302", "scenario": "anti_sharing", "ts": 1792949512.95}
+{"algo_id": "DEABB8C8-A2BC-48CA-8ED0-8CDF1BD62F61", "client_id": "mock-client-1", "event": "module", "scenario": "anti_sharing", "ts": 1792949512.951}
+{"client_id": "mock-client-1", "event": "ticket_issued", "scenario": "anti_sharing", "ticket": "MOCK-00000001", "ts": 1792949512.952}
+{"client_id": "mock-client-1", "error_code": "-600", "event": "auth_rejected", "scenario": "anti_sharing", "sub_error": "", "ts": 1792949512.953, "user": "fake-user"}
+{"event": "assertion_passed", "scenario": "anti_sharing", "ts": 1792949512.953}

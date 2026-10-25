@@ -1,0 +1,8 @@
+{"client_id": "mock-client-1", "event": "probe_302", "scenario": "session_expire_after", "ts": 1792949510.348}
+{"algo_id": "DEABB8C8-A2BC-48CA-8ED0-8CDF1BD62F61", "client_id": "mock-client-1", "event": "module", "scenario": "session_expire_after", "ts": 1792949510.349}
+{"client_id": "mock-client-1", "event": "ticket_issued", "scenario": "session_expire_after", "ticket": "MOCK-00000001", "ts": 1792949510.349}
+{"client_id": "mock-client-1", "event": "auth_ok", "scenario": "session_expire_after", "ticket": "MOCK-00000001", "ts": 1792949510.35, "user": "fake-user"}
+{"age": 0.2, "event": "session_expired", "scenario": "session_expire_after", "ticket": "MOCK-00000001", "ts": 1792949510.553}
+{"client_id": "mock-client-1", "error_code": "300", "event": "keep_invalid", "scenario": "session_expire_after", "ticket": "MOCK-00000001", "ts": 1792949510.553}
+{"client_id": "mock-client-1", "event": "term", "scenario": "session_expire_after", "ticket": "MOCK-00000001", "ts": 1792949510.554, "was_alive": false}
+{"event": "assertion_passed", "scenario": "session_expire_after", "ts": 1792949510.555}

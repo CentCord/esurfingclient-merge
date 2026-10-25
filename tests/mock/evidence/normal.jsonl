@@ -1,0 +1,18 @@
+{"client_id": "mock-client-1", "event": "probe_302", "scenario": "normal", "ts": 1792949509.526}
+{"algo_id": "DEABB8C8-A2BC-48CA-8ED0-8CDF1BD62F61", "client_id": "mock-client-1", "event": "module", "scenario": "normal", "ts": 1792949509.527}
+{"client_id": "mock-client-1", "event": "ticket_issued", "scenario": "normal", "ticket": "MOCK-00000001", "ts": 1792949509.528}
+{"client_id": "mock-client-1", "event": "auth_ok", "scenario": "normal", "ticket": "MOCK-00000001", "ts": 1792949509.529, "user": "fake-user"}
+{"client_id": "mock-client-1", "event": "probe_204", "scenario": "normal", "ts": 1792949509.529}
+{"client_id": "mock-client-1", "event": "keep_ok", "scenario": "normal", "ticket": "MOCK-00000001", "ts": 1792949509.53}
+{"algo_id": "DEABB8C8-A2BC-48CA-8ED0-8CDF1BD62F61", "client_id": "python-real-client", "event": "module", "scenario": "normal", "ts": 1792949509.561}
+{"client_id": "python-real-client", "event": "ticket_issued", "scenario": "normal", "ticket": "MOCK-00000002", "ts": 1792949509.562}
+{"client_id": "python-real-client", "event": "auth_ok", "scenario": "normal", "ticket": "MOCK-00000002", "ts": 1792949509.568, "user": "python-fake"}
+{"client_id": "python-real-client", "event": "keep_ok", "scenario": "normal", "ticket": "MOCK-00000002", "ts": 1792949509.569}
+{"client_id": "python-real-client", "event": "term", "scenario": "normal", "ticket": "MOCK-00000002", "ts": 1792949509.569, "was_alive": true}
+{"event": "python_authclient_ok", "scenario": "normal", "ticket": "MOCK-00000002", "ts": 1792949509.57}
+{"bytes": 16384, "bytes_per_sec": 125000.0, "event": "traffic_start", "line": "line-a", "scenario": "normal", "ts": 1792949509.57}
+{"bytes": 16384, "event": "traffic_end", "line": "line-a", "scenario": "normal", "ts": 1792949509.701}
+{"bytes": 16384, "bytes_per_sec": 125000.0, "event": "traffic_start", "line": "line-b", "scenario": "normal", "ts": 1792949509.704}
+{"bytes": 16384, "event": "traffic_end", "line": "line-b", "scenario": "normal", "ts": 1792949509.836}
+{"client_id": "mock-client-1", "event": "term", "scenario": "normal", "ticket": "MOCK-00000001", "ts": 1792949509.842, "was_alive": true}
+{"event": "assertion_passed", "scenario": "normal", "ts": 1792949509.842}
