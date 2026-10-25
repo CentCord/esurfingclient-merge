@@ -238,13 +238,24 @@ int work_auth(void)
      */
     g_prog_status[0].thread_id = sim_thread_cur_id();
 
-    /* 仅首次启动时按配置序号延迟认证，默认 0 秒以保持 v2.2.0-r7 行为。 */
+    /**
+     * 首次启动按账号序号错开认证，避免多账号同时登录触发服务端限流。
+     *
+     * 注意这里不能用 sleep_ms(ms, true): 它要求 g_thread_keep_alive 为真，
+     * 而该标志在 dialer_app() 里才置位 (DialerClient.c)，本函数此时还没走到那里,
+     * 可中断睡眠会立刻返回, 错峰等于没做。改为分段等待, 只响应停止请求。
+     */
     if (g_runtime_cfg.auth_stagger_sec > 0 && g_prog_status[0].login_cfg.idx > 1)
     {
-        const uint64_t stagger_ms = (uint64_t)(g_prog_status[0].login_cfg.idx - 1) *
-                                    g_runtime_cfg.auth_stagger_sec * 1000;
-        LOG_INFO("账号启动错峰等待 %" PRIu64 " 毫秒", stagger_ms);
-        sleep_ms(stagger_ms, true);
+        uint64_t remain_ms = (uint64_t)(g_prog_status[0].login_cfg.idx - 1) *
+                             g_runtime_cfg.auth_stagger_sec * 1000;
+        LOG_INFO("账号启动错峰等待 %" PRIu64 " 毫秒", remain_ms);
+        while (remain_ms > 0 && g_stop_requested == 0)
+        {
+            const uint64_t step = remain_ms > 1000 ? 1000 : remain_ms;
+            sleep_ms(step, false);
+            remain_ms -= step;
+        }
     }
 
 #ifndef __OPENWRT__
