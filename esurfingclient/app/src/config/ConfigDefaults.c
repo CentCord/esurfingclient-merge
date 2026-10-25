@@ -239,6 +239,11 @@ void runtime_config_load(const cJSON* cfg_json, runtime_config_t* out)
     out->probe_portal_confirmations = runtime_uint(probe, "portal_confirmations", 1, 1, 10);
 
     const cJSON* line = cJSON_GetObjectItem(root, "line_control");
+    if (line != NULL && !cJSON_IsObject(line))
+    {
+        LOG_WARN("runtime.line_control 必须是对象，回退该组默认值");
+        line = NULL;
+    }
     const cJSON* item = cJSON_GetObjectItem(line, "enabled");
     if (item != NULL && cJSON_IsBool(item)) out->line_control_enabled = cJSON_IsTrue(item);
     else if (item != NULL) LOG_WARN("runtime.line_control.enabled 类型非法，回退 true");
@@ -251,6 +256,11 @@ void runtime_config_load(const cJSON* cfg_json, runtime_config_t* out)
     out->line_restore_delay_sec = runtime_uint(line, "restore_delay_sec", 30, 0, 86400);
     out->line_restore_max_backoff_sec = runtime_uint(line, "restore_max_backoff_sec", 600, 1, 86400);
     const cJSON* isolation = cJSON_GetObjectItem(root, "isolation");
+    if (isolation != NULL && !cJSON_IsObject(isolation))
+    {
+        LOG_WARN("runtime.isolation 必须是对象，回退该组默认值");
+        isolation = NULL;
+    }
     out->isolation_rate_limit_sec = runtime_uint(isolation, "rate_limit_sec", 1800, 1, 86400);
 }
 
