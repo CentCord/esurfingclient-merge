@@ -25,6 +25,7 @@ static const char* state_name(const line_state_t state)
     case LINE_STATE_SESSION_INVALID: return "SESSION_INVALID";
     case LINE_STATE_RATE_LIMITED: return "RATE_LIMITED";
     case LINE_STATE_FATAL: return "FATAL";
+    case LINE_STATE_DEGRADED: return "DEGRADED";
     default: return "UNKNOWN";
     }
 }
@@ -206,6 +207,55 @@ void line_control_auth_failure(const char* error_code, const char* sub_error, co
     }
 }
 
+/**
+ * @brief 记录一次「探测 302 但心跳成功」
+ *
+ * 这个组合说明：会话在服务端仍然有效（keep 返回 200），但这台设备的 HTTP 被门户拦截。
+ * 最常见的成因是账号被别的设备抢占——服务端把会话绑在对方 IP/MAC 上，我们的 keep 还能过，
+ * 但出网流量被当成本认证处理。
+ *
+ * 连续达到阈值就摘线，但**不登出、不重认证**：会话是好的，重认证反而可能把对方的会话踢掉。
+ *
+ * @return true 表示本次已判定降级（或此前已降级）
+ */
+bool line_control_portal_seen(void)
+{
+    if (g_prog_status == NULL || tl_thread_idx < 0 || tl_thread_idx >= g_prog_cnt) return false;
+    if (!g_runtime_cfg.degrade_enabled || !iface_control_allowed()) return false;
+
+    runtime_status_t* s = &g_prog_status[tl_thread_idx].runtime_status;
+    if (s->line_degraded) return true;
+
+    s->degrade_hits++;
+    if (s->degrade_hits < g_runtime_cfg.degrade_portal_hits) return false;
+
+    line_control_set_state(LINE_STATE_DEGRADED, "持续门户重定向但会话有效");
+    if (!s->line_is_down)
+    {
+        if (!run_mwan3("ifdown") && !run_ip("down"))
+        {
+            LOG_WARN("降级摘线失败 iface=%s", g_prog_status[tl_thread_idx].login_cfg.iface);
+            return false;
+        }
+        s->line_is_down = true;
+        s->line_down_at_ms = now_ms();
+        s->line_restore_backoff_sec = g_runtime_cfg.line_restore_delay_sec;
+        s->line_next_restore_ms = s->line_down_at_ms + (uint64_t)s->line_restore_backoff_sec * 1000;
+    }
+    s->line_degraded = true;
+    /* 关键：不设置 line_force_auth —— 会话有效，不重新认证 */
+    persist_state();
+    LOG_INFO("线路降级摘线 iface=%s 连续 %u 次门户重定向，会话保持",
+             g_prog_status[tl_thread_idx].login_cfg.iface, s->degrade_hits);
+    return true;
+}
+
+void line_control_portal_ok(void)
+{
+    if (g_prog_status == NULL || tl_thread_idx < 0 || tl_thread_idx >= g_prog_cnt) return;
+    g_prog_status[tl_thread_idx].runtime_status.degrade_hits = 0;
+}
+
 bool line_control_tick(void)
 {
     if (g_prog_status == NULL || tl_thread_idx < 0 || tl_thread_idx >= g_prog_cnt) return true;
@@ -239,7 +289,9 @@ bool line_control_tick(void)
         if (run_mwan3("ifup") || run_ip("up"))
         {
             s->line_is_down = false;
-            s->line_force_auth = true;
+            /* 降级恢复：会话一直有效，不需要重新认证；会话失效恢复才需要 */
+            s->line_force_auth = !s->line_degraded;
+            s->line_degraded = false;
             s->line_restore_backoff_sec = 0;
             s->line_next_restore_ms = 0;
             persist_state();

@@ -53,7 +53,8 @@ typedef enum { RETRY_FIXED = 0, RETRY_EXPONENTIAL, RETRY_SEQUENCE } retry_backof
 typedef enum { KEEP_INTERVAL_SERVER = 0, KEEP_INTERVAL_FIXED, KEEP_INTERVAL_CLAMPED } keep_interval_mode_t;
 typedef enum { LINE_STATE_UNKNOWN = 0, LINE_STATE_INTERNET_OK, LINE_STATE_PORTAL_REDIRECT,
                LINE_STATE_PATH_ERROR, LINE_STATE_KEEP_OK, LINE_STATE_SESSION_INVALID,
-               LINE_STATE_RATE_LIMITED, LINE_STATE_FATAL } line_state_t;
+               LINE_STATE_RATE_LIMITED, LINE_STATE_FATAL,
+               LINE_STATE_DEGRADED } line_state_t;
 
 typedef struct
 {
@@ -77,6 +78,10 @@ typedef struct
     uint32_t auth_portal_max_events;
     uint32_t auth_portal_backoff_sec;
     uint32_t auth_portal_backoff_max_sec;
+    /** 持续 302 降级：连续多少次判定降级、连续多少次 204 视为恢复 */
+    bool degrade_enabled;
+    uint32_t degrade_portal_hits;
+    uint32_t degrade_recover_hits;
     uint32_t session_invalid_wait_sec;
     keep_interval_mode_t keepalive_interval_mode;
     uint32_t keepalive_interval_sec;
@@ -200,6 +205,10 @@ typedef struct
     char last_sub_error[AUTH_ERROR_CODE_LEN];
     char last_error_msg[AUTH_ERROR_MSG_LEN];
     /** 302 风暴检测：最近若干次"确认 302 且需要重登"的时刻（毫秒，单调钟） */
+    /** 连续「探测 302 但心跳成功」次数；达到阈值就摘线（不清会话） */
+    uint32_t degrade_hits;
+    /** 本次摘线是降级导致（恢复时不需要重新认证） */
+    bool line_degraded;
     uint64_t portal_hits_ms[8];
     uint8_t portal_hit_count;
     uint32_t portal_backoff_sec;

@@ -276,6 +276,16 @@ static RunStatus run(void)
         {
             line_control_set_state(LINE_STATE_KEEP_OK, "门户探测后心跳确认会话有效");
             portal_storm_reset();
+
+            /**
+             * 会话有效但探测持续 302：通常是账号被别的设备抢占。
+             * 连续达到阈值就把这条线摘出分流（不登出、不重认证）。
+             */
+            if (line_control_portal_seen())
+            {
+                LOG_INFO("账号 %u 线路降级，已摘出分流，会话保持",
+                         g_prog_status[tl_thread_idx].login_cfg.idx);
+            }
             g_prog_status[tl_thread_idx].auth_cfg.tick = get_steady_tm_ms();
             sleep_ms((uint64_t)g_runtime_cfg.probe_interval_sec * 1000, false);
             return RUN_SUCCESS;
@@ -292,6 +302,8 @@ static RunStatus run(void)
     switch (net_state)
     {
     case STATUS_OK: // 正常联网
+        /* 探测恢复正常：清空降级计数（线路若在降级中，由 tick 负责 ifup） */
+        line_control_portal_ok();
         /* 204 只证明路径可达，不能覆盖最近一次成功心跳的会话状态。 */
         if (g_prog_status[tl_thread_idx].runtime_status.line_state != LINE_STATE_KEEP_OK)
             line_control_set_state(LINE_STATE_INTERNET_OK, "线路探测成功");
