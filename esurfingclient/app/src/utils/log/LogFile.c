@@ -6,8 +6,62 @@
 #include "utils/time/TimeUtils.h"
 
 #include <inttypes.h>
+#include <dirent.h>
 
 static const char s_rotate_file_name[] = ".rotate.log";
+
+/** 轮转后最多保留的历史文件数 */
+#define LOG_ROTATE_KEEP 5U
+
+/**
+ * @brief 删除旧的 rotate 文件，只保留最近若干份
+ *
+ * 日志目录默认在 tmpfs（内存）里。轮转只负责改名，不负责删除；
+ * 长时间运行在 DEBUG 级别时，历史文件会持续累积把内存吃掉。
+ * 文件名以时间戳开头，按名字排序即按时间排序。
+ */
+static void prune_rotate_files(void)
+{
+    DIR* dir = opendir(g_logger_cfg.log_dir);
+    if (dir == NULL) return;
+
+    char names[64][192];
+    size_t count = 0;
+    const size_t suffix = sizeof(s_rotate_file_name) - 1;
+    struct dirent* ent = NULL;
+    while (count < 64U && (ent = readdir(dir)) != NULL)
+    {
+        const size_t len = strlen(ent->d_name);
+        if (len <= suffix) continue;
+        if (strcmp(ent->d_name + len - suffix, s_rotate_file_name) != 0) continue;
+        snprintf(names[count], sizeof(names[count]), "%s", ent->d_name);
+        count++;
+    }
+    closedir(dir);
+
+    if (count <= LOG_ROTATE_KEEP) return;
+
+    for (size_t i = 0; i < count; i++)
+    {
+        for (size_t j = i + 1; j < count; j++)
+        {
+            if (strcmp(names[i], names[j]) > 0)
+            {
+                char tmp[192];
+                memcpy(tmp, names[i], sizeof(tmp));
+                memcpy(names[i], names[j], sizeof(names[i]));
+                memcpy(names[j], tmp, sizeof(tmp));
+            }
+        }
+    }
+
+    for (size_t i = 0; i + LOG_ROTATE_KEEP < count; i++)
+    {
+        char path[320];
+        const int n = snprintf(path, sizeof(path), "%s%c%s", safe_str(g_logger_cfg.log_dir), SEP, names[i]);
+        if (n > 0 && (size_t)n < sizeof(path)) remove(path);
+    }
+}
 
 #define LOG_ID_CHECK_LINES 32
 
@@ -196,6 +250,10 @@ void rotate(void)
     {
         // 多半是已被其它进程抢先轮转, 属于正常竞争
         fprintf(stderr, "[INFO] 日志轮转未生效 (可能已被其它进程轮转): %s\n", g_logger_cfg.log_file);
+    }
+    else
+    {
+        prune_rotate_files();
     }
 
     if (open_log_file() == false)

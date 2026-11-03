@@ -100,6 +100,9 @@ start_service() {
   # 临时调试到期就自动降级, 免得忘记关掉把 tmpfs 写满
   revert_expired_debug_level
 
+  # 启动时先清一遍历史日志，覆盖"上次没停干净/长期运行"留下的文件
+  prune_old_logs "$(get_log_dir)"
+
   local accounts
   accounts="$($PROG --list-accounts 2>/dev/null)"
 
