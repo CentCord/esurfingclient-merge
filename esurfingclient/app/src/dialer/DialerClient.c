@@ -275,21 +275,35 @@ static RunStatus run(void)
         if (confirm_session_alive())
         {
             line_control_set_state(LINE_STATE_KEEP_OK, "门户探测后心跳确认会话有效");
-            portal_storm_reset();
 
             /**
-             * 会话有效但探测持续 302：通常是账号被别的设备抢占。
-             * 连续达到阈值就把这条线摘出分流（不登出、不重认证）。
+             * 会话有效但探测**持续** 302：心跳还在成功，说明服务端会话记录还在，
+             * 但这台设备的出网流量被当成未认证 —— 常见于账号被别的设备抢占。
+             *
+             * 不能一直相信心跳（否则这条线永远不重连）；连续达到阈值就放弃当前会话，
+             * 强制重新认证一次。认证要用这条线，所以此时不摘线。
+             * 若认证失败（限流/致命），由 line_control_auth_failure 负责摘线与隔离。
              */
             if (line_control_portal_seen())
             {
-                LOG_INFO("账号 %u 线路降级，已摘出分流，会话保持",
-                         g_prog_status[tl_thread_idx].login_cfg.idx);
+                LOG_WARN("账号 %u 连续 %u 次门户重定向但心跳仍成功，判定会话假有效，强制重新认证",
+                         g_prog_status[tl_thread_idx].login_cfg.idx,
+                         g_runtime_cfg.degrade_portal_hits);
+                /* 连续出现时按风暴退避拉长间隔，避免反复登录 */
+                const uint32_t storm_wait = portal_storm_record();
+                if (storm_wait > 0) sleep_ms((uint64_t)storm_wait * 1000, true);
+                reset();
+                /* 不 return：落到下面 switch 的 NEED_AUTH 分支重新认证 */
             }
-            g_prog_status[tl_thread_idx].auth_cfg.tick = get_steady_tm_ms();
-            sleep_ms((uint64_t)g_runtime_cfg.probe_interval_sec * 1000, false);
-            return RUN_SUCCESS;
+            else
+            {
+                g_prog_status[tl_thread_idx].auth_cfg.tick = get_steady_tm_ms();
+                sleep_ms((uint64_t)g_runtime_cfg.probe_interval_sec * 1000, false);
+                return RUN_SUCCESS;
+            }
         }
+        else
+        {
         const runtime_status_t* failed = &g_prog_status[tl_thread_idx].runtime_status;
         line_control_auth_failure(failed->last_error_code, failed->last_sub_error, "门户探测后的会话确认失败");
         if (failed->line_state == LINE_STATE_RATE_LIMITED || failed->line_state == LINE_STATE_FATAL)
@@ -297,13 +311,15 @@ static RunStatus run(void)
         line_control_session_invalid("门户探测且会话心跳确认失败");
         if (pause_reauth_if_disabled()) return RUN_SUCCESS;
         if (g_prog_status[tl_thread_idx].runtime_status.line_is_down) return RUN_SUCCESS;
+        }
     }
 
     switch (net_state)
     {
     case STATUS_OK: // 正常联网
-        /* 探测恢复正常：清空降级计数（线路若在降级中，由 tick 负责 ifup） */
+        /* 探测恢复正常：清空降级计数与 302 风暴计数 */
         line_control_portal_ok();
+        portal_storm_reset();
         /* 204 只证明路径可达，不能覆盖最近一次成功心跳的会话状态。 */
         if (g_prog_status[tl_thread_idx].runtime_status.line_state != LINE_STATE_KEEP_OK)
             line_control_set_state(LINE_STATE_INTERNET_OK, "线路探测成功");

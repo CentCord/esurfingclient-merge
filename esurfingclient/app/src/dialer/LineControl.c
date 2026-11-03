@@ -221,32 +221,17 @@ void line_control_auth_failure(const char* error_code, const char* sub_error, co
 bool line_control_portal_seen(void)
 {
     if (g_prog_status == NULL || tl_thread_idx < 0 || tl_thread_idx >= g_prog_cnt) return false;
-    if (!g_runtime_cfg.degrade_enabled || !iface_control_allowed()) return false;
+    if (!g_runtime_cfg.degrade_enabled) return false;
 
     runtime_status_t* s = &g_prog_status[tl_thread_idx].runtime_status;
-    if (s->line_degraded) return true;
-
     s->degrade_hits++;
     if (s->degrade_hits < g_runtime_cfg.degrade_portal_hits) return false;
 
-    line_control_set_state(LINE_STATE_DEGRADED, "持续门户重定向但会话有效");
-    if (!s->line_is_down)
-    {
-        if (!run_mwan3("ifdown") && !run_ip("down"))
-        {
-            LOG_WARN("降级摘线失败 iface=%s", g_prog_status[tl_thread_idx].login_cfg.iface);
-            return false;
-        }
-        s->line_is_down = true;
-        s->line_down_at_ms = now_ms();
-        s->line_restore_backoff_sec = g_runtime_cfg.line_restore_delay_sec;
-        s->line_next_restore_ms = s->line_down_at_ms + (uint64_t)s->line_restore_backoff_sec * 1000;
-    }
-    s->line_degraded = true;
-    /* 关键：不设置 line_force_auth —— 会话有效，不重新认证 */
-    persist_state();
-    LOG_INFO("线路降级摘线 iface=%s 连续 %u 次门户重定向，会话保持",
-             g_prog_status[tl_thread_idx].login_cfg.iface, s->degrade_hits);
+    /**
+     * 达到阈值只做判定，不在这里摘线：
+     * 调用方应放弃当前会话、强制重新认证一次（认证本身要用这条线）。
+     * 若认证失败，由 line_control_auth_failure 决定摘线/隔离。
+     */
     return true;
 }
 
