@@ -291,3 +291,56 @@
 # 5. 预期：wan2_dev 被 down，日志出现 SESSION_INVALID 与 line down 记录
 # 6. 恢复后预期：先 up、再认证、成功后状态回到 INTERNET_OK
 ```
+
+---
+
+## 8. 阶段 7（待做）：持续 302 → 线路降级 → 主动摘线
+
+### 8.1 来自真实故障（2026-10-26 12:45）
+
+账号 2（`t1576`, mark 0x200, wan2_dev）被另一台设备登录抢占，日志表现为每 2 秒横跳：
+
+```
+KEEP_OK -> PORTAL_REDIRECT 原因=线路探测收到门户重定向
+PORTAL_REDIRECT -> KEEP_OK 原因=门户探测后心跳确认会话有效
+```
+
+即：**探测持续 302（HTTP 被门户拦），但 keep 仍返回成功**。现有逻辑据此判定“会话有效”，
+保持在线、不摘线，结果 mwan3 继续往这条线分流量，表现为周期性掉线、Steam 下载中途失败。
+
+触发点：`10:05:01` 一次 keep 超时（curl 28）之后开始。
+
+### 8.2 判据
+
+```
+连续 N 次探测都是 302，且 keep 仍成功
+  → LINE_DEGRADED（会话在，但线路不可用）
+  → mwan3 ifdown <mwan3_iface>
+  → 不清会话、不登出、不重登
+  → 探测恢复 204 → mwan3 ifup 重新加入
+```
+
+不能用“keep 成功”一条判定线路可用：keep 走认证服务器，探测走出网路径，两者可以不一致。
+（见 DESIGN-PHILOSOPHY.md 的“三种观察值不能互相替代”。）
+
+### 8.3 参数（新增，需可调）
+
+```json
+"runtime": {
+  "degrade": {
+    "enabled": true,
+    "portal_hits": 5,
+    "recover_hits": 2,
+    "action": "ifdown"
+  }
+}
+```
+
+### 8.4 测试要点
+
+1. mock 用 `portal_redirect_all`，但 keep 仍成功 → 复现“302 + keep OK”
+2. 10 秒内该线被 `mwan3 ifdown`，`ip rule` 里该表消失
+3. 其他线不受影响
+4. **不触发登出/重登**（登出计数为 0）
+5. 探测恢复 204 后 `mwan3 ifup` 回到分流
+6. 全部在 QEMU 虚拟机里跑，只用假账号 u1..u4

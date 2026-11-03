@@ -409,7 +409,8 @@ return view.extend({
                 restore_delay_sec: 30, restore_max_backoff_sec: 600
             },
             isolation: { rate_limit_sec: 1800 },
-            log: { hot_reload: false }
+            log: { hot_reload: false },
+            degrade: { enabled: true, portal_hits: 5, recover_hits: 2 }
         };
     },
 
@@ -554,6 +555,12 @@ return view.extend({
             self.rtBool('认证失败时下线', 'runtime.line_control.down_on_auth_failed'),
             self.rtNum('恢复延迟', 'runtime.line_control.restore_delay_sec', '秒'),
             self.rtNum('恢复退避上限', 'runtime.line_control.restore_max_backoff_sec', '秒'),
+
+            E('h4', {}, '线路降级'),
+            self.rtBool('启用持续 302 降级', 'runtime.degrade.enabled',
+                '会话有效但探测持续被门户拦截时，把这条线摘出分流（不登出、不重认证）'),
+            self.rtNum('连续次数阈值', 'runtime.degrade.portal_hits', '连续多少次 302 判定降级；默认 5（约 10 秒）'),
+            self.rtNum('恢复确认次数', 'runtime.degrade.recover_hits', '连续多少次 204 才认为恢复'),
 
             E('h4', {}, '隔离'),
             self.rtNum('限流隔离时长', 'runtime.isolation.rate_limit_sec', '秒；被 11064000 限流后暂停该账号多久'),

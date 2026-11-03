@@ -105,6 +105,12 @@ void clean(void)
     g_prog_status[tl_thread_idx].runtime_status.line_next_restore_ms = previous.line_next_restore_ms;
     g_prog_status[tl_thread_idx].runtime_status.line_restore_backoff_sec = previous.line_restore_backoff_sec;
     g_prog_status[tl_thread_idx].runtime_status.rate_limited_until_ms = previous.rate_limited_until_ms;
+    /**
+     * 强制重认证的限流时间戳必须跨 reset 保留，否则每次 reset 都清零，
+     * 「两次强制重认证至少间隔一个退避周期」就永远不生效。
+     * degrade_hits 不保留：重新认证后应重新计数，避免马上又触发。
+     */
+    g_prog_status[tl_thread_idx].runtime_status.last_forced_reauth_ms = previous.last_forced_reauth_ms;
 }
 
 void reset(void)

@@ -39,7 +39,7 @@ static const cfg_def_t s_cfg_defaults[] = {
     {"op_timeout",       CFG_DEF_NUM, false, DEFAULT_OP_TIMEOUT, NULL, "秒"},
     {"web_port",         CFG_DEF_NUM, false, DEFAULT_WEB_PORT, NULL, NULL},
     {"runtime",          CFG_DEF_OBJ, false, 0,
-     "{\"reconnect\":{\"enabled\":true,\"max_attempts\":0,\"line_error_max_attempts\":5,\"line_error_interval_sec\":10,\"backoff\":\"sequence\",\"intervals_sec\":[60,180,300,600,1200,1800],\"fixed_interval_sec\":300,\"base_sec\":60,\"multiplier\":2.0,\"max_sec\":1800,\"jitter_sec\":15},\"auth\":{\"connect_timeout_sec\":10,\"request_timeout_sec\":15,\"stagger_sec\":20,\"session_invalid_wait_sec\":0,\"portal_storm\":{\"window_sec\":120,\"max_events\":3,\"backoff_sec\":30,\"backoff_max_sec\":600}},\"keepalive\":{\"interval_mode\":\"server\",\"interval_sec\":300,\"min_interval_sec\":30,\"max_interval_sec\":1800,\"failure_retries\":5,\"retry_interval_sec\":3,\"retry_jitter_sec\":1},\"probe\":{\"interval_sec\":2,\"connect_timeout_ms\":3000,\"request_timeout_ms\":4000,\"line_error_tolerance\":3,\"portal_confirmations\":2},\"line_control\":{\"enabled\":true,\"down_on_session_invalid\":true,\"down_on_auth_failed\":false,\"restore_delay_sec\":30,\"restore_max_backoff_sec\":600},\"isolation\":{\"rate_limit_sec\":1800},\"log\":{\"hot_reload\":false}}", NULL},
+     "{\"reconnect\":{\"enabled\":true,\"max_attempts\":0,\"line_error_max_attempts\":5,\"line_error_interval_sec\":10,\"backoff\":\"sequence\",\"intervals_sec\":[60,180,300,600,1200,1800],\"fixed_interval_sec\":300,\"base_sec\":60,\"multiplier\":2.0,\"max_sec\":1800,\"jitter_sec\":15},\"auth\":{\"connect_timeout_sec\":10,\"request_timeout_sec\":15,\"stagger_sec\":20,\"session_invalid_wait_sec\":0,\"portal_storm\":{\"window_sec\":120,\"max_events\":3,\"backoff_sec\":30,\"backoff_max_sec\":600}},\"keepalive\":{\"interval_mode\":\"server\",\"interval_sec\":300,\"min_interval_sec\":30,\"max_interval_sec\":1800,\"failure_retries\":5,\"retry_interval_sec\":3,\"retry_jitter_sec\":1},\"probe\":{\"interval_sec\":2,\"connect_timeout_ms\":3000,\"request_timeout_ms\":4000,\"line_error_tolerance\":3,\"portal_confirmations\":2},\"line_control\":{\"enabled\":true,\"down_on_session_invalid\":true,\"down_on_auth_failed\":false,\"restore_delay_sec\":30,\"restore_max_backoff_sec\":600},\"isolation\":{\"rate_limit_sec\":1800},\"log\":{\"hot_reload\":false},\"degrade\":{\"enabled\":true,\"portal_hits\":5,\"recover_hits\":2}}", NULL},
 };
 
 static uint8_t complete_object_from_template(cJSON* object, const cJSON* defaults, const char* prefix)
@@ -123,6 +123,14 @@ void runtime_config_defaults(runtime_config_t* cfg)
     cfg->line_restore_delay_sec = 30;
     cfg->line_restore_max_backoff_sec = 600;
     cfg->log_hot_reload = false;
+
+    /**
+     * 持续 302 降级：会话有效（keep 成功）但探测持续 302 —— 常见于账号被别的设备抢占。
+     * 连续 5 次（约 10 秒）判定降级并摘线，不清会话、不重登。
+     */
+    cfg->degrade_enabled = true;
+    cfg->degrade_portal_hits = 5;
+    cfg->degrade_recover_hits = 2;
     cfg->isolation_rate_limit_sec = 1800;
 }
 
@@ -305,6 +313,22 @@ void runtime_config_load(const cJSON* cfg_json, runtime_config_t* out)
         if (cJSON_IsBool(hot)) out->log_hot_reload = cJSON_IsTrue(hot);
         else if (hot != NULL) LOG_WARN("runtime.log.hot_reload 类型非法，回退 false");
     }
+
+    /* runtime.degrade：持续 302 判定线路降级 */
+    const cJSON* degrade = cJSON_GetObjectItem(root, "degrade");
+    if (degrade != NULL && !cJSON_IsObject(degrade))
+    {
+        LOG_WARN("runtime.degrade 必须是对象，回退该组默认值");
+        degrade = NULL;
+    }
+    if (degrade != NULL)
+    {
+        const cJSON* en = cJSON_GetObjectItem(degrade, "enabled");
+        if (cJSON_IsBool(en)) out->degrade_enabled = cJSON_IsTrue(en);
+        else if (en != NULL) LOG_WARN("runtime.degrade.enabled 类型非法，回退 true");
+    }
+    out->degrade_portal_hits = runtime_uint(degrade, "portal_hits", 5, 1, 120);
+    out->degrade_recover_hits = runtime_uint(degrade, "recover_hits", 2, 1, 120);
 }
 
 /**
