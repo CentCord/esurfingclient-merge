@@ -286,6 +286,25 @@ static RunStatus run(void)
              */
             if (line_control_portal_seen())
             {
+                runtime_status_t* rs = &g_prog_status[tl_thread_idx].runtime_status;
+                const uint64_t now_ms = get_steady_tm_ms();
+                const uint64_t gap_ms = (uint64_t)g_runtime_cfg.auth_portal_backoff_sec * 1000;
+
+                /**
+                 * 最小间隔：reset() 会绕过风暴窗口计数，所以这里再兜一道，
+                 * 保证两次强制重认证之间至少隔 auth.portal_storm.backoff_sec 秒。
+                 */
+                if (rs->last_forced_reauth_ms != 0 && now_ms - rs->last_forced_reauth_ms < gap_ms)
+                {
+                    uint64_t wait = gap_ms - (now_ms - rs->last_forced_reauth_ms);
+                    LOG_INFO("账号 %u 距上次强制重认证不足 %u 秒，等待 %" PRIu64 " 毫秒",
+                             g_prog_status[tl_thread_idx].login_cfg.idx,
+                             g_runtime_cfg.auth_portal_backoff_sec, wait);
+                    sleep_ms(wait > 5000 ? 5000 : wait, false);
+                    return RUN_SUCCESS;
+                }
+                rs->last_forced_reauth_ms = now_ms;
+
                 LOG_WARN("账号 %u 连续 %u 次门户重定向但心跳仍成功，判定会话假有效，强制重新认证",
                          g_prog_status[tl_thread_idx].login_cfg.idx,
                          g_runtime_cfg.degrade_portal_hits);

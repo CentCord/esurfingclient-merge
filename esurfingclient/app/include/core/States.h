@@ -207,6 +207,8 @@ typedef struct
     /** 302 风暴检测：最近若干次"确认 302 且需要重登"的时刻（毫秒，单调钟） */
     /** 连续「探测 302 但心跳成功」次数；达到阈值就摘线（不清会话） */
     uint32_t degrade_hits;
+    /** 上次强制重认证的单调钟时刻，用于限流 */
+    uint64_t last_forced_reauth_ms;
     /** 本次摘线是降级导致（恢复时不需要重新认证） */
     bool line_degraded;
     uint64_t portal_hits_ms[8];
