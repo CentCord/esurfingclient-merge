@@ -66,6 +66,19 @@ archive_previous_log() {
   if mv "$log_file" "$target" 2>/dev/null; then
       echo "esurfingclient: 上一轮的日志已归档为 ${target##*/}"
   fi
+  prune_old_logs "$log_dir"
+}
+
+# 归档日志放在 tmpfs 里，只保留最近若干个，否则重启次数多了会把内存占满
+prune_old_logs() {
+  local dir="$1"
+  local keep=5
+  ls -1 "$dir"/[0-9]*.log 2>/dev/null | sort -r | tail -n +$((keep + 1)) | while read -r f; do
+      rm -f "$f"
+  done
+  ls -1 "$dir"/*.rotate.log 2>/dev/null | sort -r | tail -n +$((keep + 1)) | while read -r f; do
+      rm -f "$f"
+  done
 }
 
 boot() {
