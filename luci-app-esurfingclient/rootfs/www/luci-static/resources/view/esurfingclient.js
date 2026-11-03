@@ -106,7 +106,19 @@ return view.extend({
                                 self.showNotification('已保存，运行中的进程约 5 秒内热切换日志等级', 'info');
                             });
                         }
-                    }, '热切换日志等级（不重启）')
+                    }, '热切换日志等级（不重启）'),
+                    E('button', {
+                        class: 'cbi-button cbi-button-reset',
+                        style: 'margin-top: 6px; margin-left: 6px;',
+                        click: function() {
+                            if (!confirm('确定重启 ESurfing 客户端服务？')) return;
+                            fs.exec('/etc/init.d/esurfingclient', ['restart']).then(function() {
+                                self.showNotification('服务已重启', 'info');
+                            }).catch(function(err) {
+                                self.showNotification('重启失败: ' + err, 'error');
+                            });
+                        }
+                    }, '重启服务')
                 ])
             ]),
             E('div', { class: 'cbi-value' }, [

@@ -59,6 +59,9 @@ static void persist_state(void)
 #endif
 }
 
+/** 同一组状态变化在多少毫秒内只记一次 */
+#define STATE_LOG_DEDUPE_MS 60000ULL
+
 void line_control_set_state(const line_state_t state, const char* reason)
 {
     if (g_prog_status == NULL || tl_thread_idx < 0 || tl_thread_idx >= g_prog_cnt) return;
@@ -66,11 +69,51 @@ void line_control_set_state(const line_state_t state, const char* reason)
     if (s->line_state == state) return;
     const line_state_t old = s->line_state;
     s->line_state = state;
-    LOG_INFO("线路状态账号=%u mark=0x%x iface=%s %s -> %s 原因=%s",
-             g_prog_status[tl_thread_idx].login_cfg.idx,
-             g_prog_status[tl_thread_idx].login_cfg.mark,
-             g_prog_status[tl_thread_idx].login_cfg.iface[0] ? g_prog_status[tl_thread_idx].login_cfg.iface : "-",
-             state_name(old), state_name(state), reason ? reason : "-");
+
+    /**
+     * 门户抖动去重：KEEP_OK <-> PORTAL_REDIRECT 每 2 秒来回一次时，
+     * 每条都记会把日志刷满（一天几万行）。同一组 (from,to) 在窗口内只记一次，
+     * 被压掉的次数在下一次真正记录时一并带出，信息不丢。
+     */
+    static struct
+    {
+        line_state_t from;
+        line_state_t to;
+        uint64_t last_ms;
+        uint32_t suppressed;
+    } dedupe;
+
+    const uint64_t now = get_steady_tm_ms();
+    if (dedupe.from == old && dedupe.to == state && now - dedupe.last_ms < STATE_LOG_DEDUPE_MS)
+    {
+        dedupe.last_ms = now;
+        dedupe.suppressed++;
+        persist_state();
+        return;
+    }
+
+    const uint32_t suppressed = dedupe.suppressed;
+    dedupe.from = old;
+    dedupe.to = state;
+    dedupe.last_ms = now;
+    dedupe.suppressed = 0;
+
+    if (suppressed > 0)
+    {
+        LOG_INFO("线路状态账号=%u mark=0x%x iface=%s %s -> %s 原因=%s (另有 %u 次相同变化已省略)",
+                 g_prog_status[tl_thread_idx].login_cfg.idx,
+                 g_prog_status[tl_thread_idx].login_cfg.mark,
+                 g_prog_status[tl_thread_idx].login_cfg.iface[0] ? g_prog_status[tl_thread_idx].login_cfg.iface : "-",
+                 state_name(old), state_name(state), reason ? reason : "-", suppressed);
+    }
+    else
+    {
+        LOG_INFO("线路状态账号=%u mark=0x%x iface=%s %s -> %s 原因=%s",
+                 g_prog_status[tl_thread_idx].login_cfg.idx,
+                 g_prog_status[tl_thread_idx].login_cfg.mark,
+                 g_prog_status[tl_thread_idx].login_cfg.iface[0] ? g_prog_status[tl_thread_idx].login_cfg.iface : "-",
+                 state_name(old), state_name(state), reason ? reason : "-");
+    }
     persist_state();
 }
 
